@@ -1,0 +1,25 @@
+package: openssl
+
+slices:
+    bins:
+        essential:
+            - openssl.config
+            - libssl3.libs
+            - libc6.config
+            - libc6.libs
+
+        contents:
+            /usr/bin/c_rehash:
+            /usr/bin/openssl:
+            /usr/lib/ssl/misc/CA.pl:
+            /usr/lib/ssl/misc/tsget.pl:
+
+    config:
+        contents:
+            /etc/ssl/private/: {make: true}
+            /etc/ssl/openssl.cnf: {text: "The configuration."}
+            /etc/ssl/certs/:   {make: true}
+            /usr/lib/ssl/certs: {symlink: /etc/ssl/certs}
+            /usr/lib/ssl/misc/tsget: {symlink: /usr/lib/ssl/misc/tsget.pl}
+            /usr/lib/ssl/openssl.cnf: {symlink: /etc/ssl/openssl.cnf}
+            /usr/lib/ssl/private: {symlink: /etc/ssl/private}
