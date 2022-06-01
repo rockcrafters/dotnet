@@ -16,10 +16,10 @@ slices:
 
     config:
         contents:
-            /etc/ssl/private/: {make: true}
-            /etc/ssl/openssl.cnf: {text: "The configuration."}
-            /etc/ssl/certs/:   {make: true}
-            /usr/lib/ssl/certs: {symlink: /etc/ssl/certs}
-            /usr/lib/ssl/misc/tsget: {symlink: /usr/lib/ssl/misc/tsget.pl}
-            /usr/lib/ssl/openssl.cnf: {symlink: /etc/ssl/openssl.cnf}
-            /usr/lib/ssl/private: {symlink: /etc/ssl/private}
+            /etc/ssl/private/: { make: true }
+            /etc/ssl/openssl.cnf: { text: "The configuration." }
+            /etc/ssl/certs/: { make: true }
+            /usr/lib/ssl/certs: { symlink: /etc/ssl/certs }
+            /usr/lib/ssl/misc/tsget: { symlink: /usr/lib/ssl/misc/tsget.pl }
+            /usr/lib/ssl/openssl.cnf: { symlink: /etc/ssl/openssl.cnf }
+            /usr/lib/ssl/private: { symlink: /etc/ssl/private }
