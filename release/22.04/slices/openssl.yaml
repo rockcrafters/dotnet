@@ -3,10 +3,10 @@ package: openssl
 slices:
     bins:
         essential:
-            - openssl.config
-            - libssl3.libs
-            - libc6.config
-            - libc6.libs
+            - openssl_config
+            - libssl3_libs
+            - libc6_config
+            - libc6_libs
 
         contents:
             /usr/bin/c_rehash:
