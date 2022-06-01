@@ -1,0 +1,16 @@
+#!/bin/bash
+set -ex
+
+if [[ ! -d release ]]; then
+    head=ubuntu-22.04
+    wget -c https://github.com/canonical/chisel-releases/archive/refs/heads/$head.zip
+    unzip $head.zip
+    mv chisel-releases-$head release
+    rm $head.zip
+fi
+
+docker build --target dotnet -t dotnet .
+docker build -t dotnet-scratch .
+
+docker run -it -u $UID -v $PWD/app:/app -w /app -e HOME=/app dotnet dotnet build
+docker run -it -u $UID -v $PWD/app:/app dotnet-scratch /app/bin/Debug/net6.0/Hello

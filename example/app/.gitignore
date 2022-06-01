@@ -1,0 +1,5 @@
+/.dotnet
+/.local
+/.nuget
+/bin
+/obj
