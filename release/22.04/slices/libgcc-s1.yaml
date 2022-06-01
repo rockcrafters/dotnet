@@ -1,0 +1,10 @@
+package: libgcc-s1
+
+slices:
+  libs:
+    essential:
+      - libc6_libs
+      
+    contents:
+      /lib/x86_64-linux-gnu/libgcc_s.so.1:
+      
