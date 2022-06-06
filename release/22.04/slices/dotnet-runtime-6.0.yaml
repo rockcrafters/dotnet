@@ -1,7 +1,7 @@
 package: dotnet-runtime-6.0
 
 slices:
-    libs:
+    bins:
         essential:
             - dotnet-hostfxr-6.0_libs
             - libc6_config

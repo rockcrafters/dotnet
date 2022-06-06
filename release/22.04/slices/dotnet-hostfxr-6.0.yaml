@@ -3,7 +3,8 @@ package: dotnet-hostfxr-6.0
 slices:
     libs:
         essential:
-            - dotnet-host_libs
+            - dotnet-host_bins
+            - dotnet-host_config
             - libc6_config
             - libc6_libs
             - libgcc-s1_libs
