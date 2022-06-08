@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env: 
-      test-results-folder: ./_test-results
+      test-results-folder: _test-results
       test-image-name: ubuntu/dotnet-runtime-deps:test
 
     steps:
