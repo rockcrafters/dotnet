@@ -5,7 +5,7 @@ ARG ROOTFS
 WORKDIR ${ROOTFS}
 RUN set -eu -x; \
     apt-get update; \
-    apt-get install -y golang git; \
+    apt-get install -y --no-install-recommends golang git; \
     useradd app; \
     mkdir /home/app; \
     chown -R app:app ${ROOTFS} /home/app 
@@ -17,10 +17,10 @@ RUN set -eu -x -o pipefail; \
     go build .chisel/cmd/chisel; \
     # TODO: remove this once the respective chisel-release is upstream 
     git clone -b ubuntu-22.04 https://github.com/woky/chisel-releases; \
-    ./chisel cut --release chisel-releases --root ${ROOTFS}/output $(cat ${ROOTFS}/install-slices); \
-    mkdir -p ${ROOTFS}/output/etc; \
-    tail -1 < /etc/passwd > ${ROOTFS}/output/etc/passwd; \
-    tail -1 < /etc/group > ${ROOTFS}/output/etc/group
+    ./chisel cut --release chisel-releases --root "${ROOTFS}/output" $(cat "${ROOTFS}/install-slices"); \
+    mkdir -p "${ROOTFS}/output/etc"; \
+    tail -1 < /etc/passwd > "${ROOTFS}/output/etc/passwd"; \
+    tail -1 < /etc/group > "${ROOTFS}/output/etc/group"
 
 FROM scratch 
 ARG ROOTFS
