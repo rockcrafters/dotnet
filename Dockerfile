@@ -4,23 +4,23 @@ FROM ubuntu:22.04 as builder
 ARG ROOTFS
 WORKDIR ${ROOTFS}
 RUN set -eu -x; \
-    apt update; \
-    apt install -y golang git; \
+    apt-get update; \
+    apt-get install -y golang git; \
     useradd app; \
     mkdir /home/app; \
     chown -R app:app ${ROOTFS} /home/app 
 COPY install-slices .
 USER app
-RUN mkdir -p output ; \
-    git clone --depth 1 -b main https://github.com/canonical/chisel chisel ; \
-    cd chisel/cmd/chisel ; \
-    go build ; \
+RUN set -eu -x -o pipefail; \
+    mkdir -p output; \
+    git clone --depth 1 -b main https://github.com/canonical/chisel chisel; \
+    go build .chisel/cmd/chisel; \
     # TODO: remove this once the respective chisel-release is upstream 
-    git clone -b ubuntu-22.04 https://github.com/woky/chisel-releases ; \
-    ./chisel cut --release chisel-releases --root ${ROOTFS}/output $(cat ${ROOTFS}/install-slices) ; \
-    mkdir -p ${ROOTFS}/output/etc ; \
-    cat /etc/passwd | tail -1 > ${ROOTFS}/output/etc/passwd ; \
-    cat /etc/group | tail -1 > ${ROOTFS}/output/etc/group
+    git clone -b ubuntu-22.04 https://github.com/woky/chisel-releases; \
+    ./chisel cut --release chisel-releases --root ${ROOTFS}/output $(cat ${ROOTFS}/install-slices); \
+    mkdir -p ${ROOTFS}/output/etc; \
+    tail -1 < /etc/passwd > ${ROOTFS}/output/etc/passwd; \
+    tail -1 < /etc/group > ${ROOTFS}/output/etc/group
 
 FROM scratch 
 ARG ROOTFS
