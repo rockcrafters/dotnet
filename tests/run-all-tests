@@ -1,0 +1,17 @@
+#!/bin/bash
+set -ex
+
+echo "Running tests..."
+
+export TEST_IMAGE_NAME=${1:-"ubuntu/dotnet-runtime-deps:test"}
+
+CURRENT_FOLDER="$(dirname $(readlink -f $0))"
+
+for test_folder in `ls -d "$CURRENT_FOLDER/*/"`
+do
+    pushd $test_folder
+
+    ./runtest
+
+    popd
+done

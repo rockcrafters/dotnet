@@ -1,0 +1,43 @@
+name: "Ubuntu .NET Runtime Deps Tests"
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    env: 
+      test-results-folder: ./_test-results
+      test-image-name: ubuntu/dotnet-runtime-deps:test
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Lint the container image recipe
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: Build the .NET runtime deps container image
+        run: docker build -t ${{ env.test-image-name }} .
+
+      - name: Prepare working environment for collecting test results
+        run: mkdir -p ${{ github.workspace }}/${{ env.test-results-folder }}
+
+      - name: Scan the .NET runtime deps image for vulnerabilities
+        run: docker scan --accept-license --dependency-tree -f Dockerfile ${{ env.test-image-name }} | tee ${{ github.workspace }}/${{ env.test-results-folder }}/vulnerability-scan-output.txt
+
+      - name: Run Tests
+        working-directory: ${{ github.workspace }}/tests
+        run: ./run-all-tests ${{ env.test-image-name }} | tee ${{ github.workspace }}/${{ env.test-results-folder }}/tests-output.txt
+
+      - if: always()
+        name: Keep test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ${{ github.workspace }}/${{ env.test-results-folder }}/*

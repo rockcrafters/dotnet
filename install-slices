@@ -1,2 +1,7 @@
-openssl_bins 
-openssl_config
+base-files_base 
+libc6_libs 
+libgcc-s1_libs 
+libssl3_libs 
+libstdc++6_libs 
+zlib1g_libs 
+ca-certificates_data

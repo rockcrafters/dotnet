@@ -1,0 +1,8 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for self-contained .NET apps"
+
+(cd src && dotnet publish)
+
+docker run -it -v $PWD/src:/app ${TEST_IMAGE_NAME} /app/bin/Debug/net6.0/Hello
