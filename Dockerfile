@@ -24,7 +24,7 @@ RUN set -eu -x -o pipefail; \
 
 FROM scratch 
 ARG ROOTFS
-COPY --from=builder $ROOTFS/output /
+COPY --from=builder "${ROOTFS}/output" /
 ENV \
     # Configure web servers to bind to port 80 when present
     ASPNETCORE_URLS=http://+:80 \
