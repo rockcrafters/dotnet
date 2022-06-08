@@ -3,16 +3,15 @@ ARG ROOTFS=/rootfs
 FROM ubuntu:22.04 as builder
 ARG ROOTFS
 WORKDIR ${ROOTFS}
-RUN set -eu -x; \
-    apt-get update; \
+SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
+RUN apt-get update; \
     apt-get install -y --no-install-recommends golang git; \
     useradd app; \
     mkdir /home/app; \
     chown -R app:app ${ROOTFS} /home/app 
 COPY install-slices .
 USER app
-RUN set -eu -x -o pipefail; \
-    mkdir -p output; \
+RUN mkdir -p output; \
     git clone --depth 1 -b main https://github.com/canonical/chisel chisel; \
     go build .chisel/cmd/chisel; \
     # TODO: remove this once the respective chisel-release is upstream 
