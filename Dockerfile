@@ -12,11 +12,12 @@ RUN apt-get update; \
 COPY install-slices .
 USER app
 RUN mkdir -p output; \
-    git clone --depth 1 -b main https://github.com/canonical/chisel chisel; \
-    go build .chisel/cmd/chisel; \
+    git clone --depth 1 -b main https://github.com/canonical/chisel chisel
+WORKDIR chisel
+RUN go build ./cmd/chisel; \
     # TODO: remove this once the respective chisel-release is upstream 
     git clone -b ubuntu-22.04 https://github.com/woky/chisel-releases; \
-    ./chisel cut --release chisel-releases --root "${ROOTFS}/output" $(cat "${ROOTFS}/install-slices"); \
+    ./chisel cut --release ./chisel-releases --root "${ROOTFS}/output" $(cat "${ROOTFS}/install-slices"); \
     mkdir -p "${ROOTFS}/output/etc"; \
     tail -1 < /etc/passwd > "${ROOTFS}/output/etc/passwd"; \
     tail -1 < /etc/group > "${ROOTFS}/output/etc/group"
