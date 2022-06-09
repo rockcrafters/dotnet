@@ -79,29 +79,43 @@ jobs:
         name: artifacts
         path: workflow/artifacts
 
-    - name: Create the Mattermost Message
-      run: |
-        if [ "${{ needs.build.outputs.build_status }}" == "failure" ]
-        then
-          msg_icon=":x:"
-        elif [ "${{ needs.build.outputs.build_status }}" == "success" ]
-        then
-          msg_icon=":white_check_mark:"
-        elif [ "${{ needs.build.outputs.build_status }}" == "cancelled" ]
-        then
-          msg_icon=":no_entry_sign:"
-        else 
-          msg_icon=":grey_question:"
-        fi
+    - uses: actions/setup-python@v2
 
-        msg=$(cat << EOF
-        ##### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status \`${{ needs.build.outputs.build_status }}\`, for:\n - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})\n - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
-        EOF
-        )
+    - uses: jannekem/run-python-script-action@v1
+      with:
+        script: |
+          import json
 
-        log="$(cat workflow/artifacts/${{ env.log-file }} | tr '\n' '\\n')"
+          if "${{ needs.build.outputs.build_status }}" == "failure":
+              msg_icon = ":x:"
+          elif "${{ needs.build.outputs.build_status }}" == "success":
+              msg_icon = ":white_check_mark:"
+          elif "${{ needs.build.outputs.build_status }}" == "cancelled":
+              msg_icon = ":no_entry_sign:"
+          else: 
+              msg_icon = ":grey_question:"
 
-        echo "{\"text\":\"$msg\", \"props\": {\"card\": \"$log\"}, \"icon-url\": \"https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg\", \"username\": \"ubuntu-rocks\",}" > mattermost.json
+          msg=f"{msg_icon} GitHub Workflow '${{ github.workflow	}}' execution " \
+                "[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) " \
+                "has ended with the status `${{ needs.build.outputs.build_status }}`, for:\n" \
+                " - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})\n" \
+                " - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})"
+        
+          with open("workflow/artifacts/${{ env.log-file }}") as log:
+              raw_logs = log.read()
+
+          mm_text = {
+              "text": msg,
+              "props": {
+                  "card": raw_logs
+              },
+              icon-url": "https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg", 
+              "username": "ubuntu-rocks"
+          }
+
+          with open("mattermost.json", "w") as mm:
+              mm.write(json.dumps(mm_text))
+              
     - uses: mattermost/action-mattermost-notify@master
       env:
         MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
