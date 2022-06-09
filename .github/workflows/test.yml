@@ -59,14 +59,14 @@ jobs:
         name: Keep test results
         uses: actions/upload-artifact@v2
         with:
-          name: oci
-          path: ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.test-oci-image-name }}
+          name: artifacts
+          path: ${{ github.workspace }}/${{ env.test-results-folder }}/*
       
       - id: set-outputs
         if: always()
         run: |
           echo "::set-output name=status::${{ job.status }}"
-          echo "::set-output name=log::$(cat ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})"
+          echo "::set-output name=log::\"$(cat ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})\""
 
   notify:
     needs:
@@ -92,9 +92,7 @@ jobs:
         fi
 
         msg=$(cat << EOF
-        #### $msg_icon GitHub Workflow "${{ github.workflow	}}" execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:
-         - Project: [${{ github.repository }}](${{ github.repositoryUrl }})
-         - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+        #### $msg_icon GitHub Workflow "${{ github.workflow	}}" execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:\n - Project: [${{ github.repository }}](${{ github.repositoryUrl }})\n - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
         EOF
         )
 
