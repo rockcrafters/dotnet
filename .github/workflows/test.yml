@@ -95,26 +95,29 @@ jobs:
           else: 
               msg_icon = ":grey_question:"
 
-          msg=f"{msg_icon} GitHub Workflow '${{ github.workflow	}}' execution " \
+          msg = f"{msg_icon} GitHub Workflow '${{ github.workflow	}}' execution " \
                 "[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) " \
                 "has ended with the status `${{ needs.build.outputs.build_status }}`, for:\n" \
                 " - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})\n" \
                 " - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})"
         
-          with open("workflow/artifacts/${{ env.log-file }}") as log:
-              raw_logs = log.read()
+          try:
+              with open("workflow/artifacts/${{ env.log-file }}") as log:
+                  raw_logs = log.read()
+          except FileNotFoundError:
+              raw_logs = "Logs not found!"
 
           mm_text = {
               "text": msg,
               "props": {
                   "card": raw_logs
               },
-              icon-url": "https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg", 
+              "icon-url": "https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg", 
               "username": "ubuntu-rocks"
           }
 
           with open("mattermost.json", "w") as mm:
-              mm.write(json.dumps(mm_text))
+              mm.write(json.dumps(mm_text))          
               
     - uses: mattermost/action-mattermost-notify@master
       env:
