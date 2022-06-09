@@ -15,7 +15,6 @@ jobs:
 
     outputs:
       build_status: ${{ steps.set-outputs.outputs.status }}
-      build_log: ${{ steps.set-outputs.outputs.log }}
 
     steps:
       - uses: actions/checkout@v2
@@ -66,9 +65,6 @@ jobs:
         if: always()
         run: |
           echo "::set-output name=status::${{ job.status }}"
-          raw_logs="$(cat ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})"
-          logs="${raw_logs//$'\n'/\\n}"
-          echo "::set-output name=log::$logs"
 
   notify:
     needs:
@@ -78,6 +74,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: artifacts
+        path: workflow/artifacts
+
     - name: Create the Mattermost Message
       run: |
         if [ "${{ needs.build.outputs.build_status }}" == "failure" ]
@@ -94,11 +95,11 @@ jobs:
         fi
 
         msg=$(cat << EOF
-        #### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:\n - Project: [${{ github.repository }}](${{ github.repositoryUrl }})\n - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+        ##### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status `${{ needs.build.outputs.build_status }}`, for:\n - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})\n - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
         EOF
         )
 
-        echo "{\"text\":\"$msg\", \"props\": {\"card\": \"${{ needs.build.outputs.build_log }}\"}}" > mattermost.json
+        echo "{\"text\":\"$msg\", \"props\": {\"card\": \"$(cat workflow/artifacts/output.log)\"}}" > mattermost.json
     - uses: mattermost/action-mattermost-notify@master
       env:
         MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
