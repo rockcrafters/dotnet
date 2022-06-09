@@ -42,7 +42,7 @@ jobs:
 
       - name: Collect ${{ env.test-image-name }} as an OCI artifact
         run: |
-          exec &> >(tee ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
+          exec &> >(tee -a ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           skopeo copy docker-daemon:${{ env.test-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.test-oci-image-name }}
 
       # TODO: use snyk action instead and get a Snyk token for ROCKs
@@ -52,7 +52,7 @@ jobs:
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
         run: |
-          exec &> >(tee l${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
+          exec &> >(tee -a ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           ./run-all-tests ${{ env.test-image-name }} 
 
       - if: always()
@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "::set-output name=status::${{ job.status }}"
           raw_logs="$(cat ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})"
-          logs="${raw_logs//$'\n'/'%0A'}"
+          logs="${raw_logs//$'\n'/\\n}"
           echo "::set-output name=log::$logs"
 
   notify:
