@@ -1,3 +1,9 @@
 .cache
 chisel
 chisel.yaml
+/.dotnet
+/.local
+/.nuget
+/bin
+/obj
+.vscode

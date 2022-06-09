@@ -1,0 +1,8 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for self-contained .NET Web app "
+
+(cd src && dotnet publish --self-contained -r linux-x64)
+
+docker run -v $PWD/src:/app ${TEST_IMAGE_NAME} /app/bin/Debug/net6.0/linux-x64/Hello
