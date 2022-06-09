@@ -2,15 +2,16 @@ name: "Ubuntu .NET Runtime Deps Tests"
 
 on: push
 
+env: 
+  test-results-folder: _test-results
+  test-image-name: ubuntu/dotnet-runtime-deps:test
+  test-oci-image-name: ubuntu_dotnet-runtime-deps_test
+  log-file: output.log
+
 jobs:
   build:
     runs-on: ubuntu-22.04
     name: Build and Test
-
-    env: 
-      test-results-folder: _test-results
-      test-image-name: ubuntu/dotnet-runtime-deps:test
-      log-file: output.log
 
     outputs:
       build_status: ${{ steps.set-status.outputs.status }}
@@ -41,7 +42,7 @@ jobs:
       - name: Collect ${{ env.test-image-name }} as an OCI artifact
         run: |
           exec &> >(tee l${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
-          skopeo copy docker-daemon:${{ env.test-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/$(echo ${{ env.test-image-name }} | sed s'/[/:]/_/g' )
+          skopeo copy docker-daemon:${{ env.test-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.test-oci-image-name }}
 
       # TODO: use snyk action instead and get a Snyk token for ROCKs
       # - name: Scan the .NET runtime deps image for vulnerabilities
@@ -53,15 +54,16 @@ jobs:
           exec &> >(tee l${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           ./run-all-tests ${{ env.test-image-name }} 
 
-      - id: set-status
-        run: echo "::set-output name=status::${{ job.status }}"
-
       - if: always()
         name: Keep test results
         uses: actions/upload-artifact@v2
         with:
           name: oci
-          path: ${{ github.workspace }}/${{ env.test-results-folder }}/$(echo ${{ env.test-image-name }} | sed s'/[/:]/_/g' )
+          path: ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.test-oci-image-name }}
+      
+      - id: set-status
+        if: always()
+        run: echo "::set-output name=status::${{ job.status }}"
 
   notify:
     needs:
@@ -86,7 +88,7 @@ jobs:
           msg_icon=":grey_question:"
         fi
 
-        msg==$(cat << EOF
+        msg=$(cat << EOF
         #### $msg_icon GitHub Workflow "${{ github.workflow	}}" execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:
          - Project: [${{ github.repository }}](${{ github.repositoryUrl }})
          - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
