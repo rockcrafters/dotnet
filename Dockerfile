@@ -6,9 +6,8 @@ WORKDIR ${ROOTFS}
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update; \
     apt-get install -y golang git; \
-    useradd app; \
-    mkdir /home/app; \
-    chown -R app:app ${ROOTFS} /home/app 
+    useradd -m app; \
+    chown -R app:app ${ROOTFS}
 COPY install-slices .
 USER app
 RUN mkdir -p output; \
