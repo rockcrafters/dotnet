@@ -12,8 +12,8 @@ RUN apt-get update; \
 COPY install-slices .
 USER app
 RUN mkdir -p output; \
-    git clone --depth 1 -b main https://github.com/canonical/chisel chisel
-WORKDIR $PWD/chisel
+    git clone --depth 1 -b main https://github.com/canonical/chisel
+WORKDIR ${ROOTFS}/chisel
 RUN go build ./cmd/chisel; \
     # TODO: remove this once the respective chisel-release is upstream 
     git clone -b ubuntu-22.04 https://github.com/woky/chisel-releases; \
