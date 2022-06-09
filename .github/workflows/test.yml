@@ -92,7 +92,7 @@ jobs:
         fi
 
         msg=$(cat << EOF
-        #### $msg_icon GitHub Workflow "${{ github.workflow	}}" execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:\n - Project: [${{ github.repository }}](${{ github.repositoryUrl }})\n - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+        #### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:\n - Project: [${{ github.repository }}](${{ github.repositoryUrl }})\n - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
         EOF
         )
 
