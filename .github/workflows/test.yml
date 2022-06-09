@@ -48,3 +48,14 @@ jobs:
         with:
           name: test-results
           path: ${{ github.workspace }}/${{ env.test-results-folder }}/*
+
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Create the Mattermost Message
+      run: |
+        echo "{\"text\":\"testing github action :tada:\"}" > mattermost.json
+    - uses: mattermost/action-mattermost-notify@master
+      env:
+        MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
