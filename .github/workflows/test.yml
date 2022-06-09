@@ -10,9 +10,18 @@ jobs:
     env: 
       test-results-folder: _test-results
       test-image-name: ubuntu/dotnet-runtime-deps:test
+      log-file: output.log
+
+    outputs:
+      build_status: ${{ steps.set-status.outputs.status }}
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Prepare working environment for running and collecting test results
+        run: |
+          mkdir -p ${{ github.workspace }}/${{ env.test-results-folder }}; 
+          sudo apt-get -y install skopeo
 
       - uses: actions/setup-dotnet@v2
         with:
@@ -24,16 +33,15 @@ jobs:
           dockerfile: Dockerfile
           ignore: DL3008,SC2046,DL3015
 
-      - name: Prepare working environment for running and collecting test results
-        run: |
-          mkdir -p ${{ github.workspace }}/${{ env.test-results-folder }}; 
-          sudo apt-get -y install skopeo
-
       - name: Build the .NET runtime deps container image
-        run: docker build -t ${{ env.test-image-name }} .
+        run: |
+          exec &> >(tee l${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
+          docker build -t ${{ env.test-image-name }} .
 
       - name: Collect ${{ env.test-image-name }} as an OCI artifact
-        run: skopeo copy docker-daemon:${{ env.test-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/$(echo ${{ env.test-image-name }} | sed s'/[/:]/_/g' )
+        run: |
+          exec &> >(tee l${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
+          skopeo copy docker-daemon:${{ env.test-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/$(echo ${{ env.test-image-name }} | sed s'/[/:]/_/g' )
 
       # TODO: use snyk action instead and get a Snyk token for ROCKs
       # - name: Scan the .NET runtime deps image for vulnerabilities
@@ -41,14 +49,19 @@ jobs:
 
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
-        run: (./run-all-tests ${{ env.test-image-name }} || echo 'error:failed to run tests' && exit 1 ) 2>&1 | tee ${{ github.workspace }}/${{ env.test-results-folder }}/tests-output.txt
+        run: |
+          exec &> >(tee l${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
+          ./run-all-tests ${{ env.test-image-name }} 
+
+      - id: set-status
+        run: echo "::set-output name=status::${{ job.status }}"
 
       - if: always()
         name: Keep test results
         uses: actions/upload-artifact@v2
         with:
-          name: test-results
-          path: ${{ github.workspace }}/${{ env.test-results-folder }}/*
+          name: oci
+          path: ${{ github.workspace }}/${{ env.test-results-folder }}/$(echo ${{ env.test-image-name }} | sed s'/[/:]/_/g' )
 
   notify:
     needs:
@@ -60,7 +73,29 @@ jobs:
     steps:
     - name: Create the Mattermost Message
       run: |
-        echo "{\"text\":\"testing github action :tada:\"}" > mattermost.json
+        if [ "${{ needs.build.outputs.build_status }}" == "failure" ]
+        then
+          msg_icon=":x:"
+        elif [ "${{ needs.build.outputs.build_status }}" == "success" ]
+        then
+          msg_icon=":white_check_mark:"
+        elif [ "${{ needs.build.outputs.build_status }}" == "cancelled" ]
+        then
+          msg_icon=":no_entry_sign:"
+        else 
+          msg_icon=":grey_question:"
+        fi
+
+        msg==$(cat << EOF
+        #### $msg_icon GitHub Workflow "${{ github.workflow	}}" execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status ***${{ needs.build.outputs.build_status }}***, for:
+         - Project: [${{ github.repository }}](${{ github.repositoryUrl }})
+         - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+        EOF
+        )
+
+        echo "{\"text\":\"$msg\", \"props\": {\"card\": \"$(cat ${{ github.workspace }}/${{ env.test-results-folder }}/$(echo ${{ env.test-image-name }} | sed s'/[/:]/_/g' ))\"}}" > mattermost.json
     - uses: mattermost/action-mattermost-notify@master
       env:
         MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
+        MATTERMOST_ICON: https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg
+        MATTERMOST_USERNAME: ubuntu-rocks

@@ -31,7 +31,7 @@ RUN set -eux ;\
     :
 COPY src /app
 WORKDIR /app
-RUN dotnet publish -r linux-x64 
+RUN dotnet publish --self-contained -r linux-x64 
 
 FROM ${DOTNET_RUNTIME_DEPS_IMAGE}
 COPY --from=dotnet /app/bin /app/bin
