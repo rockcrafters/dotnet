@@ -99,8 +99,9 @@ jobs:
         EOF
         )
 
-        echo "{\"text\":\"$msg\", \"props\": {\"card\": \"$(cat workflow/artifacts/${{ env.log-file }} | tr '\n' ',')\"}, \"icon-url\": \"https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg\", \"username\": \"ubuntu-rocks\"}" > mattermost.json
-        cat mattermost.json
+        # TODO: props.card needs to have the logs properly escaped
+        #echo "{\"text\":\"$msg\", \"props\": {\"card\": \"$(cat workflow/artifacts/${{ env.log-file }} | tr -d)\"}, \"icon-url\": \"https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg\", \"username\": \"ubuntu-rocks\"}" > mattermost.json
+        echo "{\"text\":\"$msg\", \"icon-url\": \"https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg\", \"username\": \"ubuntu-rocks\"}" > mattermost.json
 
     - uses: mattermost/action-mattermost-notify@master
       env:
