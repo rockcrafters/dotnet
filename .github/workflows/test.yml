@@ -5,6 +5,7 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-22.04
+    name: Build and Test
 
     env: 
       test-results-folder: _test-results
@@ -40,7 +41,7 @@ jobs:
 
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
-        run: (./run-all-tests ${{ env.test-image-name }} || echo 'error:failed to run tests') 2>&1 | tee ${{ github.workspace }}/${{ env.test-results-folder }}/tests-output.txt
+        run: (./run-all-tests ${{ env.test-image-name }} || echo 'error:failed to run tests' && exit 1 ) 2>&1 | tee ${{ github.workspace }}/${{ env.test-results-folder }}/tests-output.txt
 
       - if: always()
         name: Keep test results
@@ -50,6 +51,10 @@ jobs:
           path: ${{ github.workspace }}/${{ env.test-results-folder }}/*
 
   notify:
+    needs:
+        - build
+    if: always()
+    name: Post Workflow Status to Mattermost
     runs-on: ubuntu-latest
 
     steps:
