@@ -23,18 +23,24 @@ jobs:
           dockerfile: Dockerfile
           ignore: DL3008,SC2046,DL3015
 
+      - name: Prepare working environment for running and collecting test results
+        run: |
+          mkdir -p ${{ github.workspace }}/${{ env.test-results-folder }}; 
+          sudo apt-get -y install skopeo
+
       - name: Build the .NET runtime deps container image
         run: docker build -t ${{ env.test-image-name }} .
 
-      - name: Prepare working environment for collecting test results
-        run: mkdir -p ${{ github.workspace }}/${{ env.test-results-folder }}
-
-      - name: Scan the .NET runtime deps image for vulnerabilities
-        run: docker scan --accept-license --dependency-tree -f Dockerfile ${{ env.test-image-name }} | tee ${{ github.workspace }}/${{ env.test-results-folder }}/vulnerability-scan-output.txt
+      - name: Collect ${{ env.test-image-name }} as an OCI artifact
+        run: skopeo copy docker-daemon:${{ env.test-image-name }} oci-archive:$(echo ${{ env.test-image-name }} | tr ':' '_')
+          
+      # TODO: use snyk action instead and get a Snyk token for ROCKs
+      # - name: Scan the .NET runtime deps image for vulnerabilities
+      #   run: docker scan --accept-license --dependency-tree -f Dockerfile ${{ env.test-image-name }} | tee ${{ github.workspace }}/${{ env.test-results-folder }}/vulnerability-scan-output.txt
 
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
-        run: ./run-all-tests ${{ env.test-image-name }} | tee ${{ github.workspace }}/${{ env.test-results-folder }}/tests-output.txt
+        run: (./run-all-tests ${{ env.test-image-name }} || echo 'error:failed to run tests') 2>&1 | tee ${{ github.workspace }}/${{ env.test-results-folder }}/tests-output.txt
 
       - if: always()
         name: Keep test results
