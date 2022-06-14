@@ -4,6 +4,6 @@ chisel.yaml
 /.dotnet
 /.local
 /.nuget
-/bin
-/obj
+bin/
+obj/
 .vscode
