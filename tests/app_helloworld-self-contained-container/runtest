@@ -3,6 +3,6 @@ set -ex
 
 echo "Running test for self-contained .NET Hello World app"
 
-docker build --build-arg DOTNET_RUNTIME_DEPS_IMAGE=${TEST_IMAGE_NAME} -t helloworld:test .
+docker build --build-arg DOTNET_RUNTIME_DEPS_IMAGE=${RUNTIME_DEPS_IMAGE} -t helloworld:test .
 
 docker run --rm helloworld:test
