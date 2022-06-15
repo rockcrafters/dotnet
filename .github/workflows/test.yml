@@ -22,6 +22,7 @@ jobs:
       - name: Prepare working environment for running and collecting test results
         run: |
           mkdir -p ${{ github.workspace }}/${{ env.test-results-folder }}; 
+          sudo apt-get update
           sudo apt-get -y install skopeo
 
       - uses: actions/setup-dotnet@v2
