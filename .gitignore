@@ -7,3 +7,4 @@ chisel.yaml
 bin/
 obj/
 .vscode
+/_test-results/
