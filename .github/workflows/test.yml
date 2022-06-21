@@ -121,6 +121,8 @@ jobs:
           }
         '
 
-    - uses: mattermost/action-mattermost-notify@master
+    - uses: slackapi/slack-github-action@v1.19.0
+      with:
+        payload-file-path: "mattermost.json"
       env:
-        MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
