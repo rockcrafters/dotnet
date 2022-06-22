@@ -101,6 +101,8 @@ jobs:
         ##### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status \`${{ needs.build.outputs.build_status }}\`, for:
          - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})
          - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+
+        [Raw logs](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}/checks/${{ github.run_id }}/logs) ([download](${{ github.server_url }}/${{ github.repository }}/suites/${{ github.run_id }}/logs)
         EOF
         )
 
