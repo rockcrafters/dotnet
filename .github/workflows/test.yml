@@ -8,7 +8,6 @@ env:
   runtime-deps-image-oci-archive: ubuntu_dotnet-runtime-deps_test
   runtime-image-name: ubuntu/dotnet-runtime:test
   runtime-image-oci-archive: ubuntu_dotnet-runtime_test
-  log-file: output.log
 
 jobs:
   build:
@@ -45,7 +44,6 @@ jobs:
 
       - name: Build the .NET runtime deps container image
         run: |
-          exec &> >(tee ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           docker build -t ${{ env.runtime-deps-image-name }} -f Dockerfile.runtime-deps .
 
       - name: Build the .NET runtime container image
@@ -55,12 +53,10 @@ jobs:
 
       - name: Collect ${{ env.runtime-deps-image-name }} as an OCI artifact
         run: |
-          exec &> >(tee -a ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           skopeo copy docker-daemon:${{ env.runtime-deps-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.runtime-deps-image-oci-archive }}
 
       - name: Collect ${{ env.runtime-image-name }} as an OCI artifact
         run: |
-          exec &> >(tee -a ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           skopeo copy docker-daemon:${{ env.runtime-image-name }} oci-archive:${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.runtime-image-oci-archive }}
 
       # TODO: use snyk action instead and get a Snyk token for ROCKs
@@ -70,7 +66,6 @@ jobs:
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
         run: |
-          exec &> >(tee -a ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
           ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }}
 
       - if: always()
@@ -118,8 +113,6 @@ jobs:
         EOF
         )
 
-        # TODO: props.card needs to have the logs properly escaped
-        #echo "{\"text\":\"$msg\", \"props\": {\"card\": \"$(cat workflow/artifacts/${{ env.log-file }} | tr -d)\"}, \"icon-url\": \"https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg\", \"username\": \"ubuntu-rocks\"}" > mattermost.json
         echo "{\"text\":\"$msg\", \"icon-url\": \"https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg\", \"username\": \"ubuntu-rocks\"}" > mattermost.json
 
     - uses: mattermost/action-mattermost-notify@master
