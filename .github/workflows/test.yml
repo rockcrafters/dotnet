@@ -95,18 +95,12 @@ jobs:
 
     - name: Create the Mattermost Message
       run: |
-        if [ "${{ needs.build.outputs.build_status }}" == "failure" ]
-        then
-          msg_icon=":x:"
-        elif [ "${{ needs.build.outputs.build_status }}" == "success" ]
-        then
-          msg_icon=":white_check_mark:"
-        elif [ "${{ needs.build.outputs.build_status }}" == "cancelled" ]
-        then
-          msg_icon=":no_entry_sign:"
-        else 
-          msg_icon=":grey_question:"
-        fi
+        case "${{ needs.build.outputs.build_status }}" in
+          failure) msg_icon=":x:" ;;
+          success) msg_icon=":white_check_mark:" ;;
+          cancelled) msg_icon=":no_entry_sign:" ;;
+          *) msg_icon=":grey_question:" ;;
+        esac
 
         msg=$(cat << EOF
         ##### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status \`${{ needs.build.outputs.build_status }}\`, for:
