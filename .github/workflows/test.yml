@@ -118,13 +118,9 @@ jobs:
         jq -n --arg message "$msg" >mattermost.json '
           {
             text: $message,
-            "icon-url": "https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg",
-            username: "ubuntu-rocks",
           }
         '
 
     - uses: mattermost/action-mattermost-notify@master
       env:
         MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
-        MATTERMOST_ICON: https://annaelizabeth2019.github.io/the-rock-paper-scissors-2/images/therock1.jpg
-        MATTERMOST_USERNAME: ubuntu-rocks
