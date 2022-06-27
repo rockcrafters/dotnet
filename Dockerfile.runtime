@@ -17,3 +17,6 @@ FROM $RUNTIME_DEPS_IMAGE
 ARG DOTNET_VERSION
 ENV DOTNET_VERSION=$DOTNET_VERSION
 COPY --from=builder /rootfs-dotnet/ /
+
+ENTRYPOINT ["/usr/bin/dotnet"]
+CMD ["--info"]
