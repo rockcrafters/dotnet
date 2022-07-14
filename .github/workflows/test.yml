@@ -48,8 +48,7 @@ jobs:
 
       - name: Build the .NET runtime container image
         run: |
-          exec &> >(tee ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
-          docker build -t ${{ env.runtime-image-name }} dotnet-runtime -f dotnet-runtime-deps/Dockerfile.22.04 --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }}
+          docker build -t ${{ env.runtime-image-name }} dotnet-runtime -f dotnet-runtime/Dockerfile.22.04 --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }}
 
       - name: Collect ${{ env.runtime-deps-image-name }} as an OCI artifact
         run: |
