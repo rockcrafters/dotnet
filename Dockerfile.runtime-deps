@@ -8,7 +8,8 @@ RUN go build ./cmd/chisel
 
 FROM ubuntu:$UBUNTU_RELEASE as builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
 ARG UBUNTU_RELEASE
 ARG ROOTFS
