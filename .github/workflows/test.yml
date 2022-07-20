@@ -8,7 +8,7 @@ env:
   runtime-deps-image-oci-archive: ubuntu_dotnet-runtime-deps_test
   runtime-image-name: ubuntu/dotnet-runtime:test
   runtime-image-oci-archive: ubuntu_dotnet-runtime_test
-  ubuntu-release: '22.04'
+  ubuntu-release: '22.10'
 
 jobs:
   build:
