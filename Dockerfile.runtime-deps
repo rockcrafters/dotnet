@@ -1,5 +1,5 @@
 ARG UBUNTU_RELEASE
-ARG ROOTFS=/rootfs
+ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 as chisel
 RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
@@ -11,20 +11,22 @@ SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
-ARG UBUNTU_RELEASE
-ARG ROOTFS
-WORKDIR ${ROOTFS}
-RUN groupadd --system --gid=101 app; \
-    useradd --uid 101 --gid 101 --shell /bin/false --no-create-home --system app; \
-    mkdir -p "${ROOTFS}/output/etc"; \
-    tail -1 < /etc/passwd > "${ROOTFS}/output/etc/passwd"; \
-    tail -1 < /etc/group > "${ROOTFS}/output/etc/group"
-COPY install-slices .
-RUN chisel cut --release "ubuntu-${UBUNTU_RELEASE}" --root "${ROOTFS}/output" $(cat "${ROOTFS}/install-slices")
+ARG UBUNTU_RELEASE USER UID GROUP GID
+RUN mkdir -p /rootfs/etc \
+    && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
+    && echo "$USER:x:$UID:$GID::/nohome:/noshell" >/rootfs/etc/passwd
+RUN chisel cut --release "ubuntu-${UBUNTU_RELEASE}" --root /rootfs \
+        base-files_base \
+        libc6_libs \
+        libgcc-s1_libs \
+        libssl3_libs \
+        libstdc++6_libs \
+        zlib1g_libs \
+        ca-certificates_data \
+    ;
 
-FROM scratch 
-ARG ROOTFS
-COPY --from=builder "${ROOTFS}/output" /
+FROM scratch
+COPY --from=builder /rootfs /
 ENV \
     # Configure web servers to bind to port 8080 when present
     ASPNETCORE_URLS=http://+:8080 \
@@ -32,4 +34,5 @@ ENV \
     DOTNET_RUNNING_IN_CONTAINER=true \
     # Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
-USER app
+ARG UID GID
+USER $UID:$GID
