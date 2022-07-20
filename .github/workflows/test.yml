@@ -57,7 +57,6 @@ jobs:
             -t ${{ env.runtime-image-name }} \
             -f Dockerfile.runtime \
             --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
-            --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }} \
             .
 
       - name: Collect ${{ env.runtime-deps-image-name }} as an OCI artifact

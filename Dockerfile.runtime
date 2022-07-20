@@ -1,25 +1,37 @@
 ARG UBUNTU_RELEASE
-ARG RUNTIME_DEPS_IMAGE
+ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 as chisel
 RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go build ./cmd/chisel
 
-FROM ubuntu:22.04 as builder
+FROM ubuntu:$UBUNTU_RELEASE as builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
-ARG UBUNTU_RELEASE
-RUN mkdir /rootfs-dotnet \
-    && chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs-dotnet dotnet-runtime-6.0_libs dotnet-host_bins \
-    && ln -sr /rootfs-dotnet/usr/lib/dotnet/dotnet6-* /rootfs-dotnet/usr/lib/dotnet/dotnet6 \
-    && mkdir -p /rootfs-dotnet/usr/bin \
-    && ln -s /usr/lib/dotnet/dotnet6/dotnet /rootfs-dotnet/usr/bin/
+ARG UBUNTU_RELEASE USER UID GROUP GID
+RUN mkdir -p /rootfs/etc \
+    && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
+    && echo "$USER:x:$UID:$GID::/nohome:/noshell" >/rootfs/etc/passwd
+RUN chisel cut --release "ubuntu-${UBUNTU_RELEASE}" --root /rootfs \
+        base-files_base \
+        ca-certificates_data \
+        dotnet-runtime-6.0_libs \
+        dotnet-host_bins \
+    && ln -sr /rootfs/usr/lib/dotnet/dotnet6-* /rootfs/usr/lib/dotnet/dotnet6 \
+    && mkdir -p /rootfs/usr/bin \
+    && ln -s /usr/lib/dotnet/dotnet6/dotnet /rootfs/usr/bin/
 
-FROM $RUNTIME_DEPS_IMAGE
-COPY --from=builder /rootfs-dotnet/ /
-
+FROM scratch
+COPY --from=builder /rootfs /
+ENV \
+    # Configure web servers to bind to port 8080 when present
+    ASPNETCORE_URLS=http://+:8080 \
+    # Enable detection of running in a container
+    DOTNET_RUNNING_IN_CONTAINER=true
+ARG UID GID
+USER $UID:$GID
 ENTRYPOINT ["/usr/bin/dotnet"]
 CMD ["--info"]
