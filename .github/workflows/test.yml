@@ -8,6 +8,7 @@ env:
   runtime-deps-image-oci-archive: ubuntu_dotnet-runtime-deps_test
   runtime-image-name: ubuntu/dotnet-runtime:test
   runtime-image-oci-archive: ubuntu_dotnet-runtime_test
+  ubuntu-release: '22.04'
 
 jobs:
   build:
@@ -44,11 +45,20 @@ jobs:
 
       - name: Build the .NET runtime deps container image
         run: |
-          docker build -t ${{ env.runtime-deps-image-name }} -f Dockerfile.runtime-deps .
+          docker build \
+            -t ${{ env.runtime-deps-image-name }} \
+            -f Dockerfile.runtime-deps \
+            --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
+            .
 
       - name: Build the .NET runtime container image
         run: |
-          docker build -t ${{ env.runtime-image-name }} -f Dockerfile.runtime --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }} .
+          docker build \
+            -t ${{ env.runtime-image-name }} \
+            -f Dockerfile.runtime \
+            --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
+            --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }} \
+            .
 
       - name: Collect ${{ env.runtime-deps-image-name }} as an OCI artifact
         run: |
