@@ -1,4 +1,4 @@
-name: dotnet-runtime         # a folder with this name must exist at the project's root path
-base: 22.04                  # a image build recipe file with this suffix (eg. Dockerfile.22.04) must exist in the above folder
+name: dotnet-runtime  # a folder with this name must exist
+base: 22.04   # Dockerfile.22.10 must exist in the above folder
 platforms:
   amd64:
