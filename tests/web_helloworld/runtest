@@ -1,0 +1,27 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for ASP.NET Core app "
+
+(cd src && dotnet publish --no-self-contained -r linux-x64)
+
+docker run -d -p 8000:8080 --name web_helloworld -v $PWD/src:/app:ro $ASPNET_IMAGE /app/bin/Debug/net6.0/linux-x64/Hello.dll
+
+# Allow time for web app to start
+sleep 5
+
+# Send a request to the web app and verify the result
+ret=0
+curl http://localhost:8000/ | grep "Hello World!" || ret=1
+
+if [[ $ret -ne 0 ]]; then
+    echo "Failed to get response from app" >&2
+fi
+
+echo "Container log:"
+docker logs web_helloworld
+
+# Clean up container
+docker rm -f web_helloworld
+
+exit $ret
