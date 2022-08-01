@@ -36,11 +36,8 @@ RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
         ca-certificates_data \
         libc6_libs \
         libgcc-s1_libs \
-        liblttng-ust1_libs \
         libssl3_libs \
         libstdc++6_libs \
-        libunwind-13_libs \
-        libunwind8_libs \
         zlib1g_libs
 
 FROM image-prep
