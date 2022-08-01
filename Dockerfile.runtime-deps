@@ -1,26 +1,31 @@
-ARG ROOTFS=/rootfs
+ARG UBUNTU_RELEASE
+ARG USER=app UID=101 GROUP=app GID=101
 
-FROM ubuntu:22.04 as builder
-ARG ROOTFS
-WORKDIR ${ROOTFS}
+FROM golang:1.18 as chisel
+RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
+WORKDIR /opt/chisel
+RUN go build ./cmd/chisel
+
+FROM ubuntu:$UBUNTU_RELEASE as builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
-RUN groupadd --system --gid=101 app; \
-    useradd --uid 101 --gid 101 --shell /bin/false --no-create-home --system app; \
-    mkdir -p "${ROOTFS}/output/etc"; \
-    tail -1 < /etc/passwd > "${ROOTFS}/output/etc/passwd"; \
-    tail -1 < /etc/group > "${ROOTFS}/output/etc/group"
-RUN apt-get update; \
-    apt-get install -y golang git
-COPY install-slices .
-RUN mkdir -p output; \
-    git clone --depth 1 -b main https://github.com/canonical/chisel
-WORKDIR ${ROOTFS}/chisel
-RUN go build ./cmd/chisel; \
-    ./chisel cut --release ubuntu-22.04 --root "${ROOTFS}/output" $(cat "${ROOTFS}/install-slices")
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates
+COPY --from=chisel /opt/chisel/chisel /usr/bin/
+ARG UBUNTU_RELEASE USER UID GROUP GID
+RUN mkdir -p /rootfs/etc \
+    && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
+    && echo "$USER:x:$UID:$GID::/nohome:/noshell" >/rootfs/etc/passwd
+RUN chisel cut --release "ubuntu-${UBUNTU_RELEASE}" --root /rootfs \
+        base-files_base \
+        ca-certificates_data \
+        dotnet-runtime-6.0_libs \
+    && rm -r \
+        /rootfs/usr/lib/*-linux-*/libicu* \
+        /rootfs/usr/lib/dotnet \
+    ;
 
-FROM scratch 
-ARG ROOTFS
-COPY --from=builder "${ROOTFS}/output" /
+FROM scratch
+COPY --from=builder /rootfs /
 ENV \
     # Configure web servers to bind to port 8080 when present
     ASPNETCORE_URLS=http://+:8080 \
@@ -28,4 +33,5 @@ ENV \
     DOTNET_RUNNING_IN_CONTAINER=true \
     # Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
-USER app
+ARG UID GID
+USER $UID:$GID

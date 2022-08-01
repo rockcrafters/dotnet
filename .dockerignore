@@ -1,0 +1,4 @@
+/.git*
+/_test-results/
+/tests/app_*/src/bin/
+/tests/app_*/src/obj/
