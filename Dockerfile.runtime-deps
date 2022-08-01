@@ -34,10 +34,14 @@ ARG UBUNTU_RELEASE
 RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
         base-files_base \
         ca-certificates_data \
-        dotnet-runtime-6.0_libs \
-    && rm -r \
-        /rootfs/usr/lib/*-linux-*/libicu* \
-        /rootfs/usr/lib/dotnet
+        libc6_libs \
+        libgcc-s1_libs \
+        liblttng-ust1_libs \
+        libssl3_libs \
+        libstdc++6_libs \
+        libunwind-13_libs \
+        libunwind8_libs \
+        zlib1g_libs
 
 FROM image-prep
 COPY --from=sliced-deps /rootfs /
