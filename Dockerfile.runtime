@@ -35,7 +35,6 @@ RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
         base-files_base \
         ca-certificates_data \
         dotnet-runtime-6.0_libs \
-        dotnet-host_bins \
     && ln -sr /rootfs/usr/lib/dotnet/dotnet6-* /rootfs/usr/lib/dotnet/dotnet6 \
     && mkdir -p /rootfs/usr/bin \
     && ln -s /usr/lib/dotnet/dotnet6/dotnet /rootfs/usr/bin/
