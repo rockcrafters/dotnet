@@ -57,16 +57,6 @@ jobs:
             --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
             .
 
-      - name: Collect ${{ env.runtime-deps-image-name }} as an OCI artifact
-        run: |
-          oci_dir=$(echo ${{ env.runtime-deps-image-name }} | tr -C '[:alnum:]-' _)
-          skopeo copy docker-daemon:${{ env.runtime-deps-image-name }} oci-archive:${{ github.workspace }}/_test_results/$oci_dir
-
-      - name: Collect ${{ env.runtime-image-name }} as an OCI artifact
-        run: |
-          oci_dir=$(echo ${{ env.runtime-image-name }} | tr -C '[:alnum:]-' _)
-          skopeo copy docker-daemon:${{ env.runtime-image-name }} oci-archive:${{ github.workspace }}/_test_results/$oci_dir
-
       # TODO: use snyk action instead and get a Snyk token for ROCKs
       # - name: Scan the .NET runtime deps image for vulnerabilities
       #   run: docker scan --accept-license --dependency-tree -f Dockerfile ${{ env.runtime-deps-image-name }} | tee ${{ github.workspace }}/_test_results/vulnerability-scan-output.txt
@@ -76,13 +66,6 @@ jobs:
         run: |
           ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }}
 
-      - if: always()
-        name: Keep test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: artifacts
-          path: ${{ github.workspace }}/_test_results/*
-      
       - id: set-outputs
         if: always()
         run: |
