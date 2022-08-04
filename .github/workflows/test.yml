@@ -3,9 +3,9 @@ name: "Ubuntu .NET Runtime Deps Tests"
 on: push
 
 env: 
-  runtime-deps-image-name: ubuntu/dotnet-runtime-deps:test
+  runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
-  aspnet-image-name: ubuntu/aspnet:test
+  aspnet-image-name: ubuntu/dotnet-aspnet:test
   ubuntu-release: '22.10'
 
 jobs:
@@ -33,13 +33,19 @@ jobs:
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile.runtime-deps
-          ignore: DL3008,SC2046,DL3015
+          ignore: DL3008,DL3015,SC3028
 
       - name: Lint the .NET runtime container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile.runtime
-          ignore: DL3008,SC2046,DL3015,DL3003,DL3006
+          ignore: DL3008,DL3015,SC3028
+
+      - name: Lint the ASP.NET Core runtime container image recipe
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: Dockerfile.aspnet
+          ignore: DL3008,DL3015,SC3028
 
       - name: Build the .NET runtime deps container image
         run: |
@@ -57,6 +63,14 @@ jobs:
             --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
             .
 
+      - name: Build the ASP.NET Core runtime container image
+        run: |
+          docker build \
+            -t ${{ env.aspnet-image-name }} \
+            -f Dockerfile.aspnet \
+            --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
+            .
+
       # TODO: use snyk action instead and get a Snyk token for ROCKs
       # - name: Scan the .NET runtime deps image for vulnerabilities
       #   run: docker scan --accept-license --dependency-tree -f Dockerfile ${{ env.runtime-deps-image-name }} | tee ${{ github.workspace }}/_test_results/vulnerability-scan-output.txt
@@ -64,7 +78,7 @@ jobs:
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
         run: |
-          ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }}
+          ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }} ${{ env.aspnet-image-name }}
 
       - id: set-outputs
         if: always()
