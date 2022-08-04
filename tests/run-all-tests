@@ -3,9 +3,9 @@ set -ex
 
 echo "Running tests..."
 
-export RUNTIME_DEPS_IMAGE=${1:-"ubuntu/dotnet-runtime-deps:test"}
+export RUNTIME_DEPS_IMAGE=${1:-"ubuntu/dotnet-deps:test"}
 export RUNTIME_IMAGE=${2:-"ubuntu/dotnet-runtime:test"}
-export ASPNET_IMAGE=${3:-"ubuntu/aspnet:test"}
+export ASPNET_IMAGE=${3:-"ubuntu/dotnet-aspnet:test"}
 
 CURRENT_FOLDER="$(dirname $(readlink -f $0))"
 

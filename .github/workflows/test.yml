@@ -3,9 +3,9 @@ name: "Ubuntu .NET Runtime Deps Tests"
 on: push
 
 env: 
-  runtime-deps-image-name: ubuntu/dotnet-runtime-deps:test
+  runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
-  aspnet-image-name: ubuntu/aspnet:test
+  aspnet-image-name: ubuntu/dotnet-aspnet:test
   ubuntu-release: '22.10'
 
 jobs:
