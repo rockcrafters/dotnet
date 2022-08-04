@@ -33,19 +33,19 @@ jobs:
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile.runtime-deps
-          ignore: DL3008,DL3009,DL3015,SC3028
+          ignore: DL3008,DL3015,SC3028
 
       - name: Lint the .NET runtime container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile.runtime
-          ignore: DL3008,DL3009,DL3015,SC3028
+          ignore: DL3008,DL3015,SC3028
 
       - name: Lint the ASP.NET Core runtime container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile.aspnet
-          ignore: DL3008,DL3009,DL3015,SC3028
+          ignore: DL3008,DL3015,SC3028
 
       - name: Build the .NET runtime deps container image
         run: |
