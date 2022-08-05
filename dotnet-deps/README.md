@@ -5,4 +5,4 @@ and basic configurations, which are just enough for running [self-contained](htt
 
 # References
 
-- [Microsoft's Ubuntu Jammy-based version of the .NET Runtime container image](https://github.com/dotnet/dotnet-docker/blob/main/src/runtime/6.0/jammy/amd64/Dockerfile)
+- [Microsoft's Ubuntu Jammy-based version of the .NET Runtime Deps container image](https://github.com/dotnet/dotnet-docker/blob/main/src/runtime-deps/6.0/jammy/amd64/Dockerfile)

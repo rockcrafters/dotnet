@@ -1,4 +1,4 @@
-name: "Ubuntu .NET Runtime Tests"
+name: "Ubuntu .NET Runtime Deps Tests"
 
 on: push
 
@@ -33,22 +33,23 @@ jobs:
       - name: Lint the .NET runtime deps container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
-          dockerfile: dotnet-runtime-deps/Dockerfile.22.04
+          dockerfile: Dockerfile.runtime-deps
           ignore: DL3008,SC2046,DL3015
 
       - name: Lint the .NET runtime container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
-          dockerfile: dotnet-runtime/Dockerfile.22.04
+          dockerfile: Dockerfile.runtime
           ignore: DL3008,SC2046,DL3015,DL3003,DL3006
 
       - name: Build the .NET runtime deps container image
         run: |
-          docker build -t ${{ env.runtime-deps-image-name }} dotnet-runtime-deps -f dotnet-runtime-deps/Dockerfile.22.04
+          docker build -t ${{ env.runtime-deps-image-name }} -f Dockerfile.runtime-deps .
 
       - name: Build the .NET runtime container image
         run: |
-          docker build -t ${{ env.runtime-image-name }} dotnet-runtime -f dotnet-runtime/Dockerfile.22.04 --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }}
+          exec &> >(tee ${{ github.workspace }}/${{ env.test-results-folder }}/${{ env.log-file }})
+          docker build -t ${{ env.runtime-image-name }} -f Dockerfile.runtime --build-arg RUNTIME_DEPS_IMAGE=${{ env.runtime-deps-image-name }} .
 
       - name: Collect ${{ env.runtime-deps-image-name }} as an OCI artifact
         run: |

@@ -1,5 +1,0 @@
-name: dotnet-runtime-deps   # a folder with this name must exist
-version: 6.0
-base: 22.04   # Dockerfile.22.10 must exist in the above folder
-platforms:
-  amd64:
