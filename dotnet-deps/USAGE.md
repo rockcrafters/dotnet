@@ -43,19 +43,28 @@ Use this image to layer your self-contained .NET or ASP.NET application.
 
 ```Dockerfile
 FROM ubuntu:22.04 AS builder
-# install the .NET SDK from the Ubuntu archive
-# - no need to clean the APT layers as this is an unpublished stage
-RUN apt-get update && apt-get install -y dotnet6
-# add your application code
-WORKDIR /sln
-COPY . .
-# export your .NET app as a self-contained artefact
-RUN dotnet publish -c Release -r linux-x64 -o /sln/artifacts -p:PublishTrimmed=True
 
-FROM ubuntu/dotnet-deps:6.0-22.04_stable
+# install the .NET 6 SDK from the Ubuntu archive
+# (no need to clean the apt cache as this is an unpublished stage)
+RUN apt-get update && apt-get install -y dotnet6 ca-certificates
+
+# add your application code
+WORKDIR /source
+# using https://github.com/Azure-Samples/dotnetcore-docs-hello-world
+COPY . .
+
+# export your .NET app as a self-contained artefact
+RUN dotnet publish -c Release -r ubuntu.22.04-x64 --self-contained true -o /app
+
+FROM ubuntu/dotnet-deps:6.0-22.04_beta
+
 WORKDIR /app
-COPY --from=builder ./sln/artifacts .
-ENTRYPOINT ["dotnet", "MyDotnetApp.dll"]
+COPY --from=builder /app ./
+
+ENV PORT 8080
+EXPOSE 8080
+
+ENTRYPOINT ["/app/dotnetcoresample"]
 ```
 
 #### Parameters
