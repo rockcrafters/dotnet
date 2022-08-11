@@ -66,12 +66,12 @@ EXPOSE 8080
 
 ENTRYPOINT ["/app/dotnetcoresample"]
 ```
-
+<!-- 
 #### Parameters
 
 | Parameter | Description |
 |---|---|
-| `-e TZ=UTC` | Timezone. |
+| `-e TZ=UTC` | Timezone. | -->
 
 ## Bugs and feature requests
 
