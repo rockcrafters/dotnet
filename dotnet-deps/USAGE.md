@@ -1,17 +1,19 @@
 # .NET deps | Chiselled Ubuntu
 
-Current .NET deps Docker Image [from Canonical](https://ubuntu.com/security/docker-images), based on Ubuntu. Receives security updates and rolls to newer .NET deps or Ubuntu release. **This repository is free to use and exempted from per-user rate limits.**
+.NET deps image [from Canonical](https://ubuntu.com/security/docker-images), based on Ubuntu. Receives security updates and tracks the newest combination of .NET and Ubuntu LTS.     
+**This repository is free to use and exempted from per-user rate limits.**
 
 
 ## About .NET deps
 
-The .NET deps image is a clean base image for developers to layer their self-contained .NET and ASP.NET applications. Read more from [the .NET documentation](https://docs.microsoft.com/en-us/dotnet/core/deploying/). It only includes the runtime dependencies required to run a standard self-contained .NET application: `ca-certificates`, `libc6`, `libgcc`, `libssl3`, `libstdc++6`, and `zlib1g`.     
+The .NET deps image is a clean base image for developers to layer their self-contained .NET and ASP.NET applications. Read [the .NET documentation](https://docs.microsoft.com/en-us/dotnet/core/deploying/).     
+It only includes the runtime dependencies required to run a standard self-contained .NET application: `ca-certificates`, `libc6`, `libgcc`, `libssl3`, `libstdc++6`, and `zlib1g`.     
 
 **This image does not include bash nor a package manager.** Read more about Chiselled Ubuntu for .NET, a new class of OCI images, on [the Ubuntu blog](TODO).         
 
-Canonical and Microsoft partner together to deliver .NET to Ubuntu, read [more about the partnership](TODO) if you're interested in getting enterprise support.
+Canonical and Microsoft [partner together](TODO) to deliver and support .NET on Ubuntu.
 
-If you're looking for the .NET or the ASP.NET runtimes, please have a look at the `ubuntu/dotnet-runtime` and `ubuntu/dotnet-aspnet` images.
+If you're looking for the .NET or the ASP.NET runtime images, please have a look at the `ubuntu/dotnet-runtime` and `ubuntu/dotnet-aspnet` repositories.
 
 
 ## Tags and Architectures
@@ -25,14 +27,15 @@ _Tags in italics are not available in ubuntu/dotnet-deps but are shown here for 
 
 | Channel Tag | | | Currently | Architectures |
 |---|---|---|---|---|
- | **`6.0-22.10_beta`** &nbsp;&nbsp; |  | | .NET deps 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64`, `arm64`, `ppc64el`, `s390x` |
- | `6.0-22.04_beta` &nbsp;&nbsp; | ![LTS](https://assets.ubuntu.com/v1/0a5ff561-LTS%402x.png?h=17) | | .NET deps 6.0 on Ubuntu&nbsp;22.04&nbsp;LTS| `amd64`, `arm64`, `ppc64el`, `s390x` |
+ | `6.0-22.10_beta` &nbsp;&nbsp; |  | | .NET deps 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64`, `arm64`, `ppc64el`, `s390x` |
+ | **`6.0-22.04_beta`** &nbsp;&nbsp; | ![LTS](https://assets.ubuntu.com/v1/0a5ff561-LTS%402x.png?h=17) | | .NET deps 6.0 on Ubuntu&nbsp;22.04&nbsp;LTS| `amd64`, `arm64`, `ppc64el`, `s390x` |
 | _`track_risk`_ |
 
-Channel Tag shows the most stable channel for that track ordered `stable`, `candidate`, `beta`, `edge`. More risky channels are always implicitly available. So if `beta` is listed, you can also pull `edge`. If `candidate` is listed, you can pull `beta` and `edge`. When `stable` is listed, all four are available. Images are guaranteed to progress through the sequence `edge`, `beta`, `candidate` before `stable`.
+Channel Tag shows the most stable channel for that track. A track is a combination of both the application version and the underlying Ubuntu series, eg `1.0-22.04`.     
+Channels are ordered from the most stable to the least `stable`, `candidate`, `beta`, `edge`. More risky channels are always implicitly available. So if `beta` is listed, you can also pull `edge`. If `candidate` is listed, you can pull `beta` and `edge`. When `stable` is listed, all four are available. Images are guaranteed to progress through the sequence `edge`, `beta`, `candidate` before `stable`.
 
 ### Commercial use and Extended Security Maintenance channels
-If your usage includes commercial redistribution or requires unavailable channels/versions, please [get in touch with the Canonical team](https://ubuntu.com/security/docker-images#get-in-touch) (or using rocks@canonical.com).
+If your usage includes commercial redistribution or requires unavailable channels/versions, please [get in touch with the Canonical team](https://ubuntu.com/security/docker-images#get-in-touch) (or writing to rocks@canonical.com).
 
 ## Usage
 
