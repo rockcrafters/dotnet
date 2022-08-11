@@ -29,8 +29,8 @@ _Tags in italics are not available in ubuntu/dotnet-aspnet but are shown here fo
 
 | Channel Tag | | | Currently | Architectures |
 |---|---|---|---|---|
- | `6.0-22.10_beta` &nbsp;&nbsp; |  | | ASP.NET 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64`, `arm64`, `ppc64el`, `s390x` |
- | **`6.0-22.04_beta`** &nbsp;&nbsp; | ![LTS](https://assets.ubuntu.com/v1/0a5ff561-LTS%402x.png?h=17) | | ASP.NET 6.0 on Ubuntu&nbsp;22.04&nbsp;LTS| `amd64`, `arm64`, `ppc64el`, `s390x` |
+ | `6.0-22.10_beta` &nbsp;&nbsp; |  | | ASP.NET 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64` |
+ | **`6.0-22.04_beta`** &nbsp;&nbsp; | ![LTS](https://assets.ubuntu.com/v1/0a5ff561-LTS%402x.png?h=17) | | ASP.NET 6.0 on Ubuntu&nbsp;22.04&nbsp;LTS| `amd64` |
 | _`track_risk`_ |
 
 Channel Tag shows the most stable channel for that track. A track is a combination of both the application version and the underlying Ubuntu series, eg `1.0-22.04`.     
