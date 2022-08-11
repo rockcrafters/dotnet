@@ -42,6 +42,9 @@ If your usage includes commercial redistribution or requires unavailable channel
 
 Use this image to layer your self-contained .NET or ASP.NET application.
 
+See the following multi-stage Dockerfile, building an ASP.NET app on Ubuntu 22.04
+and packaging it on top of `ubuntu/dotnet-deps:6.0-22.04_beta`:
+
 ```Dockerfile
 FROM ubuntu:22.04 AS builder
 
@@ -67,6 +70,16 @@ EXPOSE 8080
 
 ENTRYPOINT ["/app/dotnetcoresample"]
 ```
+
+Run the following commands with the Dockerfile example from above:
+
+```sh
+git clone https://github.com/Azure-Samples/dotnetcore-docs-hello-world
+cd dotnetcore-docs-hello-world
+# copy the content from the example above into ./Dockerfile
+docker build -t my-dotnet-app-chiseled-ubuntu:22.04 .
+```
+
 <!-- 
 #### Parameters
 
