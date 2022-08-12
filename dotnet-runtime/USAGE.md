@@ -4,7 +4,7 @@
 **This repository is free to use and exempted from per-user rate limits.**
 
 
-## About .NET runtime
+## About the .NET runtime
 
 .NET is a free, cross-platform, open source developer platform for building many different types of applications. With .NET, you can use multiple languages, editors, and libraries to build for web, mobile, desktop, games, IoT, and more.
 Read [the .NET documentation](https://docs.microsoft.com/en-us/dotnet/core/deploying/) to learn how to deploy your .NET application with container images.     
@@ -29,7 +29,7 @@ _Tags in italics are not available in ubuntu/dotnet-runtime but are shown here f
 
 | Channel Tag | | | Currently | Architectures |
 |---|---|---|---|---|
- | `6.0-22.10_beta` &nbsp;&nbsp; |  | | .NET runtime 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64` |
+ | `6.0-22.10_edge` &nbsp;&nbsp; |  | | .NET runtime 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64` |
  | **`6.0-22.04_beta`** &nbsp;&nbsp; | ![LTS](https://assets.ubuntu.com/v1/0a5ff561-LTS%402x.png?h=17) | | .NET runtime 6.0 on Ubuntu&nbsp;22.04&nbsp;LTS| `amd64` |
 | _`track_risk`_ |
 

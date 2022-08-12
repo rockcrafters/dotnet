@@ -28,7 +28,7 @@ _Tags in italics are not available in ubuntu/dotnet-deps but are shown here for 
 
 | Channel Tag | | | Currently | Architectures |
 |---|---|---|---|---|
- | `6.0-22.10_beta` &nbsp;&nbsp; |  | | .NET deps 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64`, `arm64`, `ppc64el`, `s390x` |
+ | `6.0-22.10_edge` &nbsp;&nbsp; |  | | .NET deps 6.0 on Ubuntu&nbsp;22.10&nbsp;| `amd64`, `arm64`, `ppc64el`, `s390x` |
  | **`6.0-22.04_beta`** &nbsp;&nbsp; | ![LTS](https://assets.ubuntu.com/v1/0a5ff561-LTS%402x.png?h=17) | | .NET deps 6.0 on Ubuntu&nbsp;22.04&nbsp;LTS| `amd64`, `arm64`, `ppc64el`, `s390x` |
 | _`track_risk`_ |
 
