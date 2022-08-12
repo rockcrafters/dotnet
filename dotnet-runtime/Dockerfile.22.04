@@ -6,6 +6,7 @@ FROM golang:1.18 AS chisel
 RUN git clone --depth 1 -b main https://github.com/cjdcordeiro/chisel /opt/chisel
 # hadolint ignore=DL3059
 # RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chiselWORKDIR /opt/chisel
+WORKDIR /opt/chisel
 RUN go build ./cmd/chisel
 
 FROM ubuntu:$UBUNTU_RELEASE AS builder
