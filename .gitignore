@@ -8,3 +8,4 @@ bin/
 obj/
 .vscode
 /_test-results/
+_build
