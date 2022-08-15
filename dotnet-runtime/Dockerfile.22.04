@@ -3,7 +3,7 @@ ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 AS chisel
 RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel \
-    && git clone --depth 1 -b "ubuntu-$UBUNTU_RELEASE" https://github.com/cjdcordeiro/chisel-release /opt/chisel-release  
+    && git clone --depth 1 -b "ubuntu-$UBUNTU_RELEASE" https://github.com/cjdcordeiro/chisel-releases /opt/chisel-release  
 # TODO remove this clone once "ubuntu-$UBUNTU_RELEASE" is merged
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
