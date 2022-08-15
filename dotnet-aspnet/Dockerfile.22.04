@@ -2,10 +2,7 @@ ARG UBUNTU_RELEASE=22.04
 ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 AS chisel
-ARG UBUNTU_RELEASE
-
-RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel \
-    && git clone --depth 1 -b "ubuntu-$UBUNTU_RELEASE" https://github.com/cjdcordeiro/chisel-releases /opt/chisel-release  
+RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
@@ -37,8 +34,7 @@ USER $UID:$GID
 
 FROM rootfs-prep AS sliced-aspnet
 ARG UBUNTU_RELEASE
-COPY --from=chisel /opt/chisel-release /opt/chisel-release
-RUN chisel cut --release /opt/chisel-release --root /rootfs \
+RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
     ca-certificates_data \
     aspnetcore-runtime-6.0_libs \
