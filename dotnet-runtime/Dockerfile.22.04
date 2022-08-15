@@ -2,12 +2,10 @@ ARG UBUNTU_RELEASE=22.04
 ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 AS chisel
-# TODO: replace by prod Chisel once jammy-updates archives are supported
-RUN git clone --depth 1 -b main https://github.com/cjdcordeiro/chisel /opt/chisel
-# hadolint ignore=DL3059
-# RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chiselWORKDIR /opt/chisel
+RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
-RUN go build ./cmd/chisel
+RUN go generate internal/deb/version.go \
+    && go build ./cmd/chisel
 
 FROM ubuntu:$UBUNTU_RELEASE AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
@@ -36,7 +34,7 @@ USER $UID:$GID
 
 FROM rootfs-prep AS sliced-runtime
 ARG UBUNTU_RELEASE
-RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
+RUN chisel cut --release /opt --root /rootfs \
     base-files_base \
     ca-certificates_data \
     dotnet-runtime-6.0_libs \
