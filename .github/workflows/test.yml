@@ -6,16 +6,17 @@ env:
   runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
-  ubuntu-release: "22.10"
 
 jobs:
-  # TODO: once more bases are added, this should be a matrix build
   build:
     runs-on: ubuntu-22.04
     name: Build and Test
-
     outputs:
       build_status: ${{ steps.set-outputs.outputs.status }}
+    strategy:
+      fail-fast: true
+      matrix:
+        ubuntu-release: ["22.04", "22.10"]
 
     steps:
       - uses: actions/checkout@v2
@@ -30,46 +31,43 @@ jobs:
         with:
           dotnet-version: "6.0.x"
 
-      - name: Lint the .NET runtime deps 22.10 container image recipe
+      - name: Lint the .NET runtime deps container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
-          dockerfile: dotnet-deps/Dockerfile.22.10
+          dockerfile: dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
-      - name: Lint the .NET runtime 22.10 container image recipe
+      - name: Lint the .NET runtime container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
-          dockerfile: dotnet-runtime/Dockerfile.22.10
+          dockerfile: dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
-      - name: Lint the ASP.NET Core runtime 22.10 container image recipe
+      - name: Lint the ASP.NET Core runtime container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
-          dockerfile: dotnet-aspnet/Dockerfile.22.10
+          dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
-      - name: Build the .NET runtime deps 22.10 container image
+      - name: Build the .NET runtime deps container image
         run: |
           docker build \
             -t ${{ env.runtime-deps-image-name }} \
-            -f dotnet-deps/Dockerfile.22.10 \
-            --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
+            -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-deps
 
-      - name: Build the .NET runtime 22.10 container image
+      - name: Build the .NET runtime container image
         run: |
           docker build \
             -t ${{ env.runtime-image-name }} \
-            -f dotnet-runtime/Dockerfile.22.10 \
-            --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
+            -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-runtime
 
-      - name: Build the ASP.NET Core runtime 22.10 container image
+      - name: Build the ASP.NET Core runtime container image
         run: |
           docker build \
             -t ${{ env.aspnet-image-name }} \
-            -f dotnet-aspnet/Dockerfile.22.10 \
-            --build-arg UBUNTU_RELEASE=${{ env.ubuntu-release }} \
+            -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-aspnet
 
       - name: Run Tests
@@ -103,7 +101,8 @@ jobs:
           ##### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status \`${{ needs.build.outputs.build_status }}\`, for:
            - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})
            - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
-           - User: ${{ github.actor }}
+           - Commit: [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}); _${{ github.event.head_commit.message }}_
+           - Triggered by: ${{ github.triggering_actor }}
           EOF
           )
 

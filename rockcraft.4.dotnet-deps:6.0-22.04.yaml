@@ -1,6 +1,6 @@
 name: dotnet-deps
 version: 6.0
-base: 22.10
+base: 22.04
 platforms:
   amd64:
   arm64:

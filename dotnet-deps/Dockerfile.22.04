@@ -1,4 +1,4 @@
-ARG UBUNTU_RELEASE=22.10
+ARG UBUNTU_RELEASE=22.04
 ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 AS chisel
@@ -32,17 +32,18 @@ USER $UID:$GID
 
 ### BOILERPLATE END ###
 
-FROM rootfs-prep AS sliced-aspnet
+FROM rootfs-prep AS sliced-deps
 ARG UBUNTU_RELEASE
 RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
     ca-certificates_data \
-    aspnetcore-runtime-6.0_libs \
-    && ln -sr /rootfs/usr/lib/dotnet/dotnet6-* /rootfs/usr/lib/dotnet/dotnet6 \
-    && mkdir -p /rootfs/usr/bin \
-    && ln -s /usr/lib/dotnet/dotnet6/dotnet /rootfs/usr/bin/
+    libc6_libs \
+    libgcc-s1_libs \
+    libssl3_libs \
+    libstdc++6_libs \
+    zlib1g_libs
 
 FROM image-prep
-COPY --from=sliced-aspnet /rootfs /
-ENTRYPOINT ["/usr/bin/dotnet"]
-CMD ["--info"]
+COPY --from=sliced-deps /rootfs /
+# Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
