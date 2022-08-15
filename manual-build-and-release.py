@@ -262,6 +262,7 @@ rockcraft_projects = (
     if not args.rockcraft_files
     else args.rockcraft_files.split(",")
 )
+
 rockcraft_projects.sort()
 for rock_project in rockcraft_projects:
     logging.info(f"Prepare to build from {rock_project}")
@@ -318,3 +319,4 @@ for rock_project in rockcraft_projects:
             raw_cmd_tag = f"{raw_cmd} --multi-arch index-only docker://{repo}{rock_name}:{add_tag}"
 
             subprocess.check_output(raw_cmd_tag.split())
+
