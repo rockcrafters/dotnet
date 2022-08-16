@@ -280,16 +280,16 @@ for rock_project in rockcraft_projects:
     oci_name = oci_archive_name.rstrip(".rock")
     convert_to_oci(oci_archive_name, oci_name)
 
-    fix_img_config_for = [
-        {
-            "where": {"architecture": "arm64", "variant": None},
-            "change_to": {"architecture": "arm64", "variant": "v8"},
-        },
-        {
-            "where": {"architecture": "arm", "variant": None},
-            "change_to": {"architecture": "arm", "variant": "v7"},
-        },
-    ]
+    # fix_img_config_for = [
+    #     {
+    #         "where": {"architecture": "arm64", "variant": None},
+    #         "change_to": {"architecture": "arm64", "variant": "v8"},
+    #     },
+    #     {
+    #         "where": {"architecture": "arm", "variant": None},
+    #         "change_to": {"architecture": "arm", "variant": "v7"},
+    #     },
+    # ]
     inject_variant(oci_name, "arm64", "v8")
 
     # push to registries
