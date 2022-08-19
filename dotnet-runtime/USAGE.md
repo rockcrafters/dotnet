@@ -1,4 +1,4 @@
-# .NET runtime | Chiselled Ubuntu
+# Chiselled Ubuntu for .NET
 
 .NET runtime image [from Canonical](https://ubuntu.com/security/docker-images), based on Ubuntu. Receives security updates and tracks the newest combination of .NET and Ubuntu LTS.     
 **This repository is free to use and exempted from per-user rate limits.**

@@ -1,4 +1,4 @@
-# .NET deps | Chiselled Ubuntu
+# Chiselled Ubuntu for self-contained .NET
 
 .NET deps image [from Canonical](https://ubuntu.com/security/docker-images), based on Ubuntu. Receives security updates and tracks the newest combination of .NET and Ubuntu LTS.     
 **This repository is free to use and exempted from per-user rate limits.**
