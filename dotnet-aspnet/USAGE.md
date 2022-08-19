@@ -68,9 +68,6 @@ FROM ubuntu.azurecr.io/dotnet-aspnet:6.0-22.10_edge
 WORKDIR /app
 COPY --from=builder /app ./
 
-ENV PORT 8080
-EXPOSE 8080
-
 ENTRYPOINT ["dotnet", "/app/dotnetcoresample.dll"]
 ```
 
@@ -80,7 +77,9 @@ Run the following commands with the Dockerfile example from above:
 git clone https://github.com/Azure-Samples/dotnetcore-docs-hello-world
 cd dotnetcore-docs-hello-world
 # copy the content from the example above into ./Dockerfile
-docker build -t my-dotnet-app-chiseled-ubuntu:22.04 .
+docker build . -t my-chiseled-aspnet-app:latest
+docker run -p 8080:8080 my-chiseled-aspnet-app:latest
+# access http://localhost:8080/
 ```
 
 <!-- 

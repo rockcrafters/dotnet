@@ -49,9 +49,8 @@ See the following multi-stage Dockerfile, building a .NET 6 app on Ubuntu 22.04
 and packaging it on top of `ubuntu/dotnet-runtime:6.0-22.04_beta`:
 
 ```Dockerfile
-# Adapting the example code on
-# https://github.com/dotnet/samples/tree/main/core/console-apps/FibonacciBetterMsBuild
-# to use .NET 6 (<TargetFramework>net6.0</TargetFramework>)
+# Using the example code on
+# https://github.com/ubuntu-rocks/dotnet/tree/main/tests/app_helloworld-self-contained/
 
 FROM ubuntu:22.04 AS builder
 
@@ -61,7 +60,7 @@ RUN apt-get update && apt-get install -y dotnet6 ca-certificates
 
 # add your application code
 WORKDIR /source
-COPY . .
+COPY src/ .
 
 # publish your .NET app
 RUN dotnet publish -c Release -o /app
@@ -71,10 +70,16 @@ FROM ubuntu/dotnet-runtime:6.0-22.04_beta
 WORKDIR /app
 COPY --from=builder /app ./
 
-ENV PORT 8080
-EXPOSE 8080
+ENTRYPOINT ["dotnet", "/app/Hello.dll"]
+```
 
-ENTRYPOINT ["dotnet", "/app/Fibonacci.dll"]
+Run the following commands with the Dockerfile example from above:
+
+```sh
+git clone https://github.com/ubuntu-rocks/dotnet.git
+cd dotnet/tests/app_helloworld
+docker build . -t my-chiseled-dotnet-app:latest
+docker run my-chiseled-dotnet-app:latest
 ```
 
 <!-- 
