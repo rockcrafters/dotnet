@@ -9,6 +9,8 @@
 The .NET deps image is a clean base image for developers to layer their self-contained .NET and ASP.NET applications. Read [the .NET documentation](https://docs.microsoft.com/en-us/dotnet/core/deploying/).     
 It only includes the runtime dependencies required to run a standard self-contained .NET application: `ca-certificates`, `libc6`, `libgcc`, `libssl3`, `libstdc++6`, and `zlib1g`.     
 
+### About chiselled Ubuntu containers
+
 **This image does not include bash nor a package manager.**
 Read more about Chiselled Ubuntu for .NET, a new class of OCI images, on [the Ubuntu blog](https://ubuntu.com/blog/install-dotnet-on-ubuntu).         
 

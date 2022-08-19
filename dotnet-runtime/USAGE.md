@@ -11,6 +11,8 @@ Read [the .NET documentation](https://docs.microsoft.com/en-us/dotnet/core/deplo
 
 This image inherits its content from the `ubuntu/dotnet-deps` image and only adds the `dotnet-runtime-6.0` package from the Ubuntu archive.
 
+### About chiselled Ubuntu containers
+
 **This image does not include bash nor a package manager nor the .NET SDK.**
 Read more about Chiselled Ubuntu for .NET, a new class of OCI images, on [the Ubuntu blog](https://ubuntu.com/blog/install-dotnet-on-ubuntu); reading how Canonical and Microsoft partner together to deliver and support .NET on Ubuntu.
 
