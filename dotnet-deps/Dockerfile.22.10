@@ -18,8 +18,9 @@ COPY --from=chisel /opt/chisel/chisel /usr/bin/
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID
 RUN mkdir -p /rootfs/etc \
+    && install -d -m 0755 -o $UID -g $GID /rootfs/home/$USER \
     && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
-    && echo "$USER:x:$UID:$GID::/nohome:/noshell" >/rootfs/etc/passwd
+    && echo "$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
 
 FROM scratch AS image-prep
 ENV \
@@ -44,6 +45,12 @@ RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     zlib1g_libs
 
 FROM image-prep
+ARG USER UID GROUP GID
+
 COPY --from=sliced-deps /rootfs /
+
+# Workaround for https://github.com/moby/moby/issues/38710
+COPY --from=sliced-deps --chown=$UID:$GID /rootfs/home/$USER /home/$USER
+
 # Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
