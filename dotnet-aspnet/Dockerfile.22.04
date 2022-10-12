@@ -19,10 +19,8 @@ FROM builder AS rootfs-prep
 ARG USER UID GROUP GID
 RUN mkdir -p /rootfs/etc \
     && install -d -m 0755 -o $UID -g $GID /rootfs/home/$USER \
-    && echo "root:x:0:" >/rootfs/etc/group \
-    && echo "$GROUP:x:$GID:" >/rootfs/etc/group \
-    && echo "root:x:0:0:root:/root:/noshell" >/rootfs/etc/passwd \
-    && echo "$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
+    && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
+    && echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
 
 FROM scratch AS image-prep
 ENV \
