@@ -5,4 +5,9 @@ echo "Running test for .NET Hello World app"
 
 (cd src && dotnet publish --no-self-contained -r linux-x64)
 
-docker run --rm -v $PWD/src:/app:ro $RUNTIME_IMAGE /app/bin/Debug/net6.0/linux-x64/Hello.dll
+RunContainer() {
+    docker run --rm -v $PWD/src:/app:ro --user $1 $RUNTIME_IMAGE /app/bin/Debug/net6.0/linux-x64/Hello.dll
+}
+
+RunContainer app
+RunContainer root
