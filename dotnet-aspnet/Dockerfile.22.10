@@ -37,6 +37,7 @@ FROM rootfs-prep AS sliced-aspnet
 ARG UBUNTU_RELEASE
 RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
+    base-files_release-info \
     ca-certificates_data \
     aspnetcore-runtime-6.0_libs \
     && ln -sr /rootfs/usr/lib/dotnet/dotnet6-* /rootfs/usr/lib/dotnet/dotnet6 \
