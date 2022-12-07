@@ -49,9 +49,16 @@ jobs:
           dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
+      # Setup QEMU and Docker buildx
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Build the .NET runtime deps container image
         run: |
-          docker build \
+          docker buildx build --platform linux/ppc64le \
             -t ${{ env.runtime-deps-image-name }} \
             -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-deps
