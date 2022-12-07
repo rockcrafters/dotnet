@@ -40,9 +40,8 @@ RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_release-info \
     ca-certificates_data \
     dotnet-runtime-6.0_libs \
-    && ln -sr /rootfs/usr/lib/dotnet/dotnet6-* /rootfs/usr/lib/dotnet/dotnet6 \
     && mkdir -p /rootfs/usr/bin \
-    && ln -s /usr/lib/dotnet/dotnet6/dotnet /rootfs/usr/bin/
+    && ln -s /usr/lib/dotnet/dotnet /rootfs/usr/bin/
 
 FROM image-prep
 ARG USER UID GROUP GID
