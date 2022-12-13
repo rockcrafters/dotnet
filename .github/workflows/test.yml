@@ -23,14 +23,23 @@ jobs:
 
       - name: Prepare working environment for running and collecting test results
         run: |
-          mkdir -p ${{ github.workspace }}/_test_results
           sudo apt-get update
           sudo apt-get -y install skopeo
+          pip install shyaml
 
       - uses: actions/setup-dotnet@v2
         with:
           dotnet-version: "6.0.x"
 
+      # Setup QEMU and Docker buildx
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Lint the Dockerfiles
       - name: Lint the .NET runtime deps container image recipe
         uses: hadolint/hadolint-action@v2.0.0
         with:
@@ -49,26 +58,48 @@ jobs:
           dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
+      # Build images for multiple archs
       - name: Build the .NET runtime deps container image
         run: |
-          docker build \
-            -t ${{ env.runtime-deps-image-name }} \
+          set -x
+          archs=`cat rockcraft.*.dotnet-deps-6.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-deps.tar \
             -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-deps
 
+          skopeo copy oci-archive:dotnet-deps.tar docker-daemon:${{ env.runtime-deps-image-name }}
+
       - name: Build the .NET runtime container image
         run: |
-          docker build \
-            -t ${{ env.runtime-image-name }} \
+          set -x
+          archs=`cat rockcraft.*.dotnet-runtime-6.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-runtime.tar \
             -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-runtime
 
+          skopeo copy oci-archive:dotnet-runtime.tar docker-daemon:${{ env.runtime-image-name }}
+
       - name: Build the ASP.NET Core runtime container image
         run: |
-          docker build \
-            -t ${{ env.aspnet-image-name }} \
+          set -x
+          archs=`cat rockcraft.*.dotnet-aspnet-6.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-aspnet.tar \
             -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-aspnet
+
+          skopeo copy oci-archive:dotnet-aspnet.tar docker-daemon:${{ env.aspnet-image-name }}
 
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
