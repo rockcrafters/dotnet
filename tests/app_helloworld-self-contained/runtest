@@ -1,0 +1,13 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for self-contained .NET Hello World app"
+
+(cd src && dotnet publish --self-contained -r linux-x64)
+
+RunContainer() {
+    docker run --rm -v $PWD/src:/app:ro --user $1 --entrypoint /app/bin/Debug/net7.0/linux-x64/Hello $RUNTIME_DEPS_IMAGE
+}
+
+RunContainer app
+RunContainer root

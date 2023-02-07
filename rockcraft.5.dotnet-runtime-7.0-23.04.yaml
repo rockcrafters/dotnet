@@ -1,0 +1,7 @@
+name: dotnet-runtime
+version: 7.0
+base: 23.04
+platforms:
+  amd64:
+  arm64:
+    build-on: [amd64]

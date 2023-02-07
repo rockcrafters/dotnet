@@ -1,0 +1,7 @@
+name: dotnet-aspnet
+version: 7.0
+base: 22.10
+platforms:
+  amd64:
+  arm64:
+    build-on: [amd64]

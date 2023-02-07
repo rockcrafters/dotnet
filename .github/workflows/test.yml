@@ -1,0 +1,150 @@
+name: "Chiselled Ubuntu .NET7 Tests"
+
+on: push
+
+env:
+  runtime-deps-image-name: ubuntu/dotnet-deps:test
+  runtime-image-name: ubuntu/dotnet-runtime:test
+  aspnet-image-name: ubuntu/dotnet-aspnet:test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Test
+    outputs:
+      build_status: ${{ steps.set-outputs.outputs.status }}
+    strategy:
+      fail-fast: true
+      matrix:
+        ubuntu-release: ["22.10"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Prepare working environment for running and collecting test results
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install skopeo
+          pip install shyaml
+
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "7.0.x"
+
+      # Setup QEMU and Docker buildx
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Lint the Dockerfiles
+      - name: Lint the .NET runtime deps container image recipe
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }}
+          ignore: DL3008,DL3015,SC3028
+
+      - name: Lint the .NET runtime container image recipe
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }}
+          ignore: DL3008,DL3015,SC3028
+
+      - name: Lint the ASP.NET Core runtime container image recipe
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
+          ignore: DL3008,DL3015,SC3028
+
+      # Build images for multiple archs
+      - name: Build the .NET runtime deps container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-deps-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-deps.tar \
+            -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
+            dotnet-deps
+
+          skopeo copy oci-archive:dotnet-deps.tar docker-daemon:${{ env.runtime-deps-image-name }}
+
+      - name: Build the .NET runtime container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-runtime-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-runtime.tar \
+            -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
+            dotnet-runtime
+
+          skopeo copy oci-archive:dotnet-runtime.tar docker-daemon:${{ env.runtime-image-name }}
+
+      - name: Build the ASP.NET Core runtime container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-aspnet-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-aspnet.tar \
+            -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
+            dotnet-aspnet
+
+          skopeo copy oci-archive:dotnet-aspnet.tar docker-daemon:${{ env.aspnet-image-name }}
+
+      - name: Run Tests
+        working-directory: ${{ github.workspace }}/tests
+        run: |
+          ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }} ${{ env.aspnet-image-name }}
+
+      - id: set-outputs
+        if: always()
+        run: |
+          echo "::set-output name=status::${{ job.status }}"
+
+  notify:
+    needs:
+      - build
+    if: always()
+    name: Post Workflow Status to Mattermost
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create the Mattermost Message
+        run: |
+          case "${{ needs.build.outputs.build_status }}" in
+            failure) msg_icon=":x:" ;;
+            success) msg_icon=":white_check_mark:" ;;
+            cancelled) msg_icon=":no_entry_sign:" ;;
+            *) msg_icon=":grey_question:" ;;
+          esac
+
+          msg=$(cat << EOF
+          ##### $msg_icon GitHub Workflow '${{ github.workflow	}}' execution [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) has ended with the status \`${{ needs.build.outputs.build_status }}\`, for:
+           - Project: [${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})
+           - Branch: [${{ github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }})
+           - Commit: [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}); _${{ github.event.head_commit.message }}_
+           - Triggered by: ${{ github.triggering_actor }}
+          EOF
+          )
+
+          jq -n --arg message "$msg" >mattermost.json '
+            {
+              text: $message,
+            }
+          '
+
+      - uses: slackapi/slack-github-action@v1.19.0
+        with:
+          payload-file-path: "mattermost.json"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.MATTERMOST_ROCKS_DEV_WEBHOOK_URL }}
