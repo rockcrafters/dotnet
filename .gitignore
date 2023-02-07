@@ -1,0 +1,11 @@
+.cache
+chisel
+chisel.yaml
+/.dotnet
+/.local
+/.nuget
+bin/
+obj/
+.vscode
+/_test-results/
+_build
