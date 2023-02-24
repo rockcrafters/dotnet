@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "prHourlyLimit": 0,
+  "ignorePaths": [
+    "tests/*",
+    ".github/*"
+  ],
+  "packageRules": [
+    {
+      "description": "Group relevant Dockerfiles that are used for the Chiselled images",
+      "matchPaths": [
+        "dotnet-deps/Dockerfile*",
+        "dotnet-runtime/Dockerfile*",
+        "dotnet-aspnet/Dockerfile*"
+      ],
+      "groupName": "Dockerfiles of Chiselled images",
+      "enabled": true,
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "pinDigest"
+      ]
+    }
+  ],
+  "baseBranches": [
+    "/^channels\\/.*/"
+  ]
+}
