@@ -49,7 +49,7 @@ See the following multi-stage Dockerfile, building an ASP.NET 6 app on Ubuntu 22
 and packaging it on top of `ubuntu/dotnet-aspnet:6.0-22.04_beta`:
 
 ```Dockerfile
-FROM ubuntu:22.04 AS builder
+FROM ubuntu.azurecr.io/ubuntu:22.04 AS builder
 
 # install the .NET 6 SDK from the Ubuntu archive
 # (no need to clean the apt cache as this is an unpublished stage)

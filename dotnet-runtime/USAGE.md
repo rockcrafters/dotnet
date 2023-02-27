@@ -52,7 +52,7 @@ and packaging it on top of `ubuntu/dotnet-runtime:6.0-22.04_beta`:
 # Using the example code on
 # https://github.com/ubuntu-rocks/dotnet/tree/main/tests/app_helloworld-self-contained/
 
-FROM ubuntu:22.04 AS builder
+FROM ubuntu.azurecr.io/ubuntu:22.04 AS builder
 
 # install the .NET 6 SDK from the Ubuntu archive
 # (no need to clean the apt cache as this is an unpublished stage)
