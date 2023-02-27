@@ -41,19 +41,19 @@ jobs:
 
       # Lint the Dockerfiles
       - name: Lint the .NET runtime deps container image recipe
-        uses: hadolint/hadolint-action@v2.1.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
       - name: Lint the .NET runtime container image recipe
-        uses: hadolint/hadolint-action@v2.1.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
       - name: Lint the ASP.NET Core runtime container image recipe
-        uses: hadolint/hadolint-action@v2.1.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
