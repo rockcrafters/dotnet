@@ -48,7 +48,7 @@ See the following multi-stage Dockerfile, building an ASP.NET 7 app on Ubuntu 22
 and packaging it on top of `ubuntu/dotnet-aspnet:7.0-22.10_beta`:
 
 ```Dockerfile
-FROM ubuntu:22.10 AS builder
+FROM ubuntu.azurecr.io/ubuntu:22.10 AS builder
 
 # install the .NET 7 SDK from the Ubuntu archive
 # (no need to clean the apt cache as this is an unpublished stage)
