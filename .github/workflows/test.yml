@@ -19,7 +19,7 @@ jobs:
         ubuntu-release: ["22.10"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Prepare working environment for running and collecting test results
         run: |
@@ -27,7 +27,7 @@ jobs:
           sudo apt-get -y install skopeo
           pip install shyaml
 
-      - uses: actions/setup-dotnet@v2
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "7.0.x"
 
@@ -41,19 +41,19 @@ jobs:
 
       # Lint the Dockerfiles
       - name: Lint the .NET runtime deps container image recipe
-        uses: hadolint/hadolint-action@v2.0.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
       - name: Lint the .NET runtime container image recipe
-        uses: hadolint/hadolint-action@v2.0.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
       - name: Lint the ASP.NET Core runtime container image recipe
-        uses: hadolint/hadolint-action@v2.0.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
@@ -143,7 +143,7 @@ jobs:
             }
           '
 
-      - uses: slackapi/slack-github-action@v1.19.0
+      - uses: slackapi/slack-github-action@v1.23.0
         with:
           payload-file-path: "mattermost.json"
         env:
