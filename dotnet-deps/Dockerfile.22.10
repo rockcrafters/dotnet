@@ -1,4 +1,4 @@
-ARG UBUNTU_RELEASE=22.10
+ARG UBUNTU_RELEASE=23.04
 ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.18 AS chisel
@@ -7,7 +7,7 @@ WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:68ecefbf41d5dc9cd7435470011f62456e453c97f1355d7daf7b8a51a5934897 AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:28b1a4a37e590f4c37e1f5846d12e4571bbeb248387ff74744be511b064fd40c AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates \
