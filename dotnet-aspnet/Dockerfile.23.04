@@ -6,17 +6,21 @@ RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
+### TODO: REMOVE the following once the script is moved elsewhere
+RUN wget -q "https://raw.githubusercontent.com/rebornplusplus/chisel/dpkg-status/install.sh" -O chisel-cut \
+    && chmod +x chisel-cut
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:79cbe0fc854e88942ae531d707cbf14fdb2179d4196c56d56122f5020690737d AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 ### TODO: REMOVE "git" and this, once .net7 slices are merged upstream
 RUN git clone -b "ROCKS-358_dotnet7-lunar" https://github.com/cjdcordeiro/chisel-releases.git
 ###
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
+COPY --from=chisel /opt/chisel/chisel-cut /usr/bin/
 
 FROM scratch AS image-prep
 ENV \
@@ -34,7 +38,7 @@ USER $UID:$GID
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID UBUNTU_RELEASE
 RUN mkdir /rootfs \
-    && chisel cut --release ./chisel-releases --root /rootfs \
+    && CHISEL_BIN=/usr/bin/chisel CHISEL_CACHE_DIR=.cache CHISEL_DPKG_STATUS_FILE=/status chisel-cut --release ./chisel-releases --root /rootfs \
         base-files_base \
         base-files_release-info \
         ca-certificates_data \
@@ -46,6 +50,10 @@ RUN mkdir /rootfs \
 RUN install -d -m 0755 -o $UID -g $GID /rootfs/home/$USER \
     && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
     && echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
+
+FROM scratch AS sbom-prep
+COPY --from=rootfs-prep /rootfs /
+COPY --from=rootfs-prep /status /var/lib/dpkg/status
 
 FROM image-prep
 ARG USER UID GROUP GID
