@@ -39,6 +39,9 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Set up Syft
+        uses: anchore/sbom-action/download-syft@v0
+
       # Lint the Dockerfiles
       - name: Lint the .NET runtime deps container image recipe
         uses: hadolint/hadolint-action@v3.1.0
@@ -100,6 +103,60 @@ jobs:
             dotnet-aspnet
 
           skopeo copy oci-archive:dotnet-aspnet.tar docker-daemon:${{ env.aspnet-image-name }}
+
+      - name: Generate SBOM for the .NET runtime deps container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-deps-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-deps-sbom.tar \
+            -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-deps
+
+          skopeo copy oci-archive:dotnet-deps-sbom.tar docker-daemon:dotnet-deps:sbom
+          syft packages -o spdx-json docker:dotnet-deps:sbom > dotnet-deps-${{ matrix.ubuntu-release }}.sbom.json
+
+      - name: Generate SBOM for the .NET runtime container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-runtime-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-runtime-sbom.tar \
+            -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-runtime
+
+          skopeo copy oci-archive:dotnet-runtime-sbom.tar docker-daemon:dotnet-runtime:sbom
+          syft packages -o spdx-json docker:dotnet-runtime:sbom > dotnet-runtime-${{ matrix.ubuntu-release }}.sbom.json
+
+      - name: Generate SBOM for the ASP.NET Core runtime container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-aspnet-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-aspnet-sbom.tar \
+            -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-aspnet
+
+          skopeo copy oci-archive:dotnet-aspnet-sbom.tar docker-daemon:dotnet-aspnet:sbom
+          syft packages -o spdx-json docker:dotnet-aspnet:sbom > dotnet-aspnet-${{ matrix.ubuntu-release }}.sbom.json
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: SBOMs
+          path: dotnet-*.sbom.json
 
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
