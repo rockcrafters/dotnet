@@ -39,11 +39,6 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Run a local Docker registry
-        run: |
-          set -x
-          docker run -d -p 5000:5000 --restart=always --name registry registry:2
-
       - name: Set up Syft
         uses: anchore/sbom-action/download-syft@v0
 
@@ -117,18 +112,17 @@ jobs:
 
           docker buildx build \
             --platform=${buildx_platforms} \
-            -t localhost:5000/dotnet-deps:sbom \
+            --output type=oci,dest=dotnet-deps-sbom.tar \
             -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
             --target sbom-prep \
-            --push \
             dotnet-deps
 
           for arch in $archs; do
+            skopeo copy --override-arch "$arch" oci-archive:dotnet-deps-sbom.tar oci-archive:"dotnet-deps-sbom.$arch.tar"
             syft packages \
               -o spdx-json \
-              --platform "linux/$arch" \
               --name "${{ env.runtime-deps-image-name }}" \
-              localhost:5000/dotnet-deps:sbom > "dotnet-deps-${{ matrix.ubuntu-release }}.$arch.sbom.json"
+              oci-archive:"dotnet-deps-sbom.$arch.tar" > "dotnet-deps-${{ matrix.ubuntu-release }}.$arch.sbom.json"
           done
 
       - name: Generate SBOM for the .NET runtime container image
@@ -139,18 +133,17 @@ jobs:
 
           docker buildx build \
             --platform=${buildx_platforms} \
-            -t localhost:5000/dotnet-runtime:sbom \
+            --output type=oci,dest=dotnet-runtime-sbom.tar \
             -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
             --target sbom-prep \
-            --push \
             dotnet-runtime
 
           for arch in $archs; do
+            skopeo copy --override-arch "$arch" oci-archive:dotnet-runtime-sbom.tar oci-archive:"dotnet-runtime-sbom.$arch.tar"
             syft packages \
               -o spdx-json \
-              --platform "linux/$arch" \
               --name "${{ env.runtime-image-name }}" \
-              localhost:5000/dotnet-runtime:sbom > "dotnet-runtime-${{ matrix.ubuntu-release }}.$arch.sbom.json"
+              oci-archive:"dotnet-runtime-sbom.$arch.tar" > "dotnet-runtime-${{ matrix.ubuntu-release }}.$arch.sbom.json"
           done
 
       - name: Generate SBOM for the ASP.NET Core runtime container image
@@ -161,25 +154,18 @@ jobs:
 
           docker buildx build \
             --platform=${buildx_platforms} \
-            -t localhost:5000/dotnet-aspnet:sbom \
+            --output type=oci,dest=dotnet-aspnet-sbom.tar \
             -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
             --target sbom-prep \
-            --push \
             dotnet-aspnet
 
           for arch in $archs; do
+            skopeo copy --override-arch "$arch" oci-archive:dotnet-aspnet-sbom.tar oci-archive:"dotnet-aspnet-sbom.$arch.tar"
             syft packages \
               -o spdx-json \
-              --platform "linux/$arch" \
               --name "${{ env.aspnet-image-name }}" \
-              localhost:5000/dotnet-aspnet:sbom > "dotnet-aspnet-${{ matrix.ubuntu-release }}.$arch.sbom.json"
+              oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-${{ matrix.ubuntu-release }}.$arch.sbom.json"
           done
-
-      - name: Stop and remove local Docker registry
-        run: |
-          set -x
-          docker container stop registry
-          docker container rm -v registry
 
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@v3
