@@ -7,8 +7,8 @@ WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
 ### TODO: REMOVE the following once the script is moved elsewhere
-RUN wget -q "https://raw.githubusercontent.com/rebornplusplus/chisel/dpkg-status/install.sh" -O chisel-cut \
-    && chmod +x chisel-cut
+RUN wget -q "https://raw.githubusercontent.com/ubuntu-rocks/dotnet/channels/7.0/edge/chisel-wrapper" \
+    && chmod +x chisel-wrapper
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:4bbd3b5e2a496751e7e5fcb20957d1bdfacff59cc4d4c1243a3a644046f34dd7 AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
@@ -20,7 +20,7 @@ RUN apt-get update \
 RUN git clone -b "ROCKS-358_dotnet7-kinetic" https://github.com/cjdcordeiro/chisel-releases.git
 ###
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
-COPY --from=chisel /opt/chisel/chisel-cut /usr/bin/
+COPY --from=chisel /opt/chisel/chisel-wrapper /usr/bin/
 
 FROM scratch AS image-prep
 ENV \
@@ -38,7 +38,7 @@ USER $UID:$GID
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID UBUNTU_RELEASE
 RUN mkdir /rootfs \
-    && CHISEL_BIN=/usr/bin/chisel CHISEL_CACHE_DIR=.cache CHISEL_DPKG_STATUS_FILE=/status chisel-cut --release ./chisel-releases --root /rootfs \
+    && CHISEL_BIN=/usr/bin/chisel CHISEL_CACHE_DIR=.cache CHISEL_DPKG_STATUS_FILE=/status chisel-wrapper --release ./chisel-releases --root /rootfs \
         base-files_base \
         base-files_release-info \
         ca-certificates_data \
