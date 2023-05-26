@@ -90,7 +90,7 @@ jobs:
             syft packages \
               -o spdx-json \
               --name "${{ env.runtime-deps-image-name }}" \
-              oci-archive:"dotnet-deps-sbom.$arch.tar" > "dotnet-deps-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+              oci-archive:"dotnet-deps-sbom.$arch.tar" > "dotnet-deps-7.0-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
 
       - name: Build the .NET runtime container image
@@ -119,7 +119,7 @@ jobs:
             syft packages \
               -o spdx-json \
               --name "${{ env.runtime-image-name }}" \
-              oci-archive:"dotnet-runtime-sbom.$arch.tar" > "dotnet-runtime-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+              oci-archive:"dotnet-runtime-sbom.$arch.tar" > "dotnet-runtime-7.0-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
 
       - name: Build the ASP.NET Core runtime container image
@@ -148,7 +148,7 @@ jobs:
             syft packages \
               -o spdx-json \
               --name "${{ env.aspnet-image-name }}" \
-              oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+              oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-7.0-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
 
       - name: Upload SBOM artifacts
