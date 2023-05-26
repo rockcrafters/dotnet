@@ -6,6 +6,7 @@ env:
   runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
+  dotnet-version: "7.0"
 
 jobs:
   build:
@@ -90,7 +91,7 @@ jobs:
             syft packages \
               -o spdx-json \
               --name "${{ env.runtime-deps-image-name }}" \
-              oci-archive:"dotnet-deps-sbom.$arch.tar" > "dotnet-deps-7.0-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+              oci-archive:"dotnet-deps-sbom.$arch.tar" > "dotnet-deps-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
 
       - name: Build the .NET runtime container image
@@ -119,7 +120,7 @@ jobs:
             syft packages \
               -o spdx-json \
               --name "${{ env.runtime-image-name }}" \
-              oci-archive:"dotnet-runtime-sbom.$arch.tar" > "dotnet-runtime-7.0-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+              oci-archive:"dotnet-runtime-sbom.$arch.tar" > "dotnet-runtime-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
 
       - name: Build the ASP.NET Core runtime container image
@@ -148,7 +149,7 @@ jobs:
             syft packages \
               -o spdx-json \
               --name "${{ env.aspnet-image-name }}" \
-              oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-7.0-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+              oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
 
       - name: Upload SBOM artifacts
