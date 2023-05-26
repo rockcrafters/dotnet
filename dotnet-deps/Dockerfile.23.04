@@ -6,9 +6,8 @@ RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
-### TODO: REMOVE the following once the script is moved elsewhere
-RUN wget -q "https://raw.githubusercontent.com/ubuntu-rocks/dotnet/channels/7.0/edge/chisel-wrapper" \
-    && chmod +x chisel-wrapper
+ADD "https://raw.githubusercontent.com/ubuntu-rocks/dotnet/channels/7.0/edge/chisel-wrapper" chisel-wrapper
+RUN chmod +x chisel-wrapper
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:79cbe0fc854e88942ae531d707cbf14fdb2179d4196c56d56122f5020690737d AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
@@ -41,7 +40,7 @@ USER $UID:$GID
 
 FROM rootfs-prep AS sliced-deps
 ARG UBUNTU_RELEASE
-RUN CHISEL_BIN=/usr/bin/chisel CHISEL_CACHE_DIR=.cache CHISEL_DPKG_STATUS_FILE=/status chisel-wrapper --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
+RUN CHISEL_DPKG_STATUS_FILE=/status chisel-wrapper --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
     base-files_release-info \
     ca-certificates_data \
