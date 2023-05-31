@@ -6,17 +6,20 @@ RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
+ADD "https://raw.githubusercontent.com/ubuntu-rocks/dotnet/channels/7.0/edge/chisel-wrapper" chisel-wrapper
+RUN chmod +x chisel-wrapper
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:4bbd3b5e2a496751e7e5fcb20957d1bdfacff59cc4d4c1243a3a644046f34dd7 AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 ### TODO: REMOVE "git" and this, once .net7 slices are merged upstream
 RUN git clone -b "ROCKS-358_dotnet7-kinetic" https://github.com/cjdcordeiro/chisel-releases.git
 ###
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
+COPY --from=chisel /opt/chisel/chisel-wrapper /usr/bin/
 
 FROM scratch AS image-prep
 ENV \
@@ -34,7 +37,7 @@ USER $UID:$GID
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID UBUNTU_RELEASE
 RUN mkdir /rootfs \
-    && chisel cut --release ./chisel-releases --root /rootfs \
+    && CHISEL_DPKG_STATUS_FILE=/status chisel-wrapper --release ./chisel-releases --root /rootfs \
         base-files_base \
         base-files_release-info \
         ca-certificates_data \
@@ -46,6 +49,10 @@ RUN mkdir /rootfs \
 RUN install -d -m 0755 -o $UID -g $GID /rootfs/home/$USER \
     && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
     && echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
+
+FROM scratch AS sbom-prep
+COPY --from=rootfs-prep /rootfs /
+COPY --from=rootfs-prep /status /var/lib/dpkg/status
 
 FROM image-prep
 ARG USER UID GROUP GID

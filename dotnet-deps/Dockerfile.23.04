@@ -6,14 +6,17 @@ RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
+ADD "https://raw.githubusercontent.com/ubuntu-rocks/dotnet/channels/7.0/edge/chisel-wrapper" chisel-wrapper
+RUN chmod +x chisel-wrapper
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:45797c494ca7e9cc7b66af95182ca3e9e368b593c70295ebff6b6725df0478f8 AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
+COPY --from=chisel /opt/chisel/chisel-wrapper /usr/bin/
 
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID
@@ -37,7 +40,7 @@ USER $UID:$GID
 
 FROM rootfs-prep AS sliced-deps
 ARG UBUNTU_RELEASE
-RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
+RUN CHISEL_DPKG_STATUS_FILE=/status chisel-wrapper --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
     base-files_release-info \
     ca-certificates_data \
@@ -46,6 +49,10 @@ RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     libssl3_libs \
     libstdc++6_libs \
     zlib1g_libs
+
+FROM scratch AS sbom-prep
+COPY --from=sliced-deps /rootfs /
+COPY --from=sliced-deps /status /var/lib/dpkg/status
 
 FROM image-prep
 ARG USER UID GROUP GID
