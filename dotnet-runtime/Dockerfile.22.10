@@ -6,7 +6,7 @@ RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
-ADD "https://raw.githubusercontent.com/ubuntu-rocks/dotnet/channels/7.0/edge/chisel-wrapper" chisel-wrapper
+ADD "https://raw.githubusercontent.com/canonical/rocks-toolbox/main/chisel-wrapper" chisel-wrapper
 RUN chmod +x chisel-wrapper
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:4bbd3b5e2a496751e7e5fcb20957d1bdfacff59cc4d4c1243a3a644046f34dd7 AS builder
@@ -37,7 +37,7 @@ USER $UID:$GID
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID UBUNTU_RELEASE
 RUN mkdir /rootfs \
-    && CHISEL_DPKG_STATUS_FILE=/status chisel-wrapper --release ./chisel-releases --root /rootfs \
+    && chisel-wrapper --generate-dpkg-status /status -- --release ./chisel-releases --root /rootfs \
         base-files_base \
         base-files_release-info \
         ca-certificates_data \
