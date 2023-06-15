@@ -9,7 +9,7 @@ RUN go generate internal/deb/version.go \
 ADD "https://raw.githubusercontent.com/canonical/rocks-toolbox/main/chisel-wrapper" chisel-wrapper
 RUN chmod +x chisel-wrapper
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:4bbd3b5e2a496751e7e5fcb20957d1bdfacff59cc4d4c1243a3a644046f34dd7 AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:f5dc8b9d6e247c67172dd94340415094742c11edf536dd69ee83cde3f5aca3ed AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates file \
