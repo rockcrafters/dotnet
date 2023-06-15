@@ -6,14 +6,17 @@ RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
     && go build ./cmd/chisel
+ADD "https://raw.githubusercontent.com/canonical/rocks-toolbox/main/chisel-wrapper" chisel-wrapper
+RUN chmod +x chisel-wrapper
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:4bbd3b5e2a496751e7e5fcb20957d1bdfacff59cc4d4c1243a3a644046f34dd7 AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=chisel /opt/chisel/chisel /usr/bin/
+COPY --from=chisel /opt/chisel/chisel-wrapper /usr/bin/
 
 FROM builder AS rootfs-prep
 ARG USER UID GROUP GID
@@ -35,13 +38,17 @@ USER $UID:$GID
 
 FROM rootfs-prep AS sliced-aspnet
 ARG UBUNTU_RELEASE
-RUN chisel cut --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
+RUN chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
     base-files_release-info \
     ca-certificates_data \
     aspnetcore-runtime-6.0_libs \
     && mkdir -p /rootfs/usr/bin \
     && ln -s /usr/lib/dotnet/dotnet /rootfs/usr/bin/
+
+FROM scratch AS sbom-prep
+COPY --from=sliced-aspnet /rootfs /
+COPY --from=sliced-aspnet /status /var/lib/dpkg/status
 
 FROM image-prep
 ARG USER UID GROUP GID
