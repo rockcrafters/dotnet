@@ -6,6 +6,7 @@ env:
   runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
+  dotnet-version: "6.0"
 
 jobs:
   build:
@@ -38,6 +39,11 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Set up Syft
+        uses: anchore/sbom-action/download-syft@v0.14.2
+        with:
+          syft-version: "v0.80.0"
 
       # Lint the Dockerfiles
       - name: Lint the .NET runtime deps container image recipe
@@ -73,6 +79,21 @@ jobs:
 
           skopeo copy oci-archive:dotnet-deps.tar docker-daemon:${{ env.runtime-deps-image-name }}
 
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-deps-sbom.tar \
+            -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-deps
+
+          for arch in $archs; do
+            skopeo copy --override-arch "$arch" oci-archive:dotnet-deps-sbom.tar oci-archive:"dotnet-deps-sbom.$arch.tar"
+            syft packages \
+              -o spdx-json \
+              --name "${{ env.runtime-deps-image-name }}" \
+              oci-archive:"dotnet-deps-sbom.$arch.tar" > "dotnet-deps-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+          done
+
       - name: Build the .NET runtime container image
         run: |
           set -x
@@ -87,6 +108,21 @@ jobs:
 
           skopeo copy oci-archive:dotnet-runtime.tar docker-daemon:${{ env.runtime-image-name }}
 
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-runtime-sbom.tar \
+            -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-runtime
+
+          for arch in $archs; do
+            skopeo copy --override-arch "$arch" oci-archive:dotnet-runtime-sbom.tar oci-archive:"dotnet-runtime-sbom.$arch.tar"
+            syft packages \
+              -o spdx-json \
+              --name "${{ env.runtime-image-name }}" \
+              oci-archive:"dotnet-runtime-sbom.$arch.tar" > "dotnet-runtime-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+          done
+
       - name: Build the ASP.NET Core runtime container image
         run: |
           set -x
@@ -100,6 +136,27 @@ jobs:
             dotnet-aspnet
 
           skopeo copy oci-archive:dotnet-aspnet.tar docker-daemon:${{ env.aspnet-image-name }}
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-aspnet-sbom.tar \
+            -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-aspnet
+
+          for arch in $archs; do
+            skopeo copy --override-arch "$arch" oci-archive:dotnet-aspnet-sbom.tar oci-archive:"dotnet-aspnet-sbom.$arch.tar"
+            syft packages \
+              -o spdx-json \
+              --name "${{ env.aspnet-image-name }}" \
+              oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+          done
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: SBOMs
+          path: dotnet-*-root.sbom.spdx
 
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
