@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ubuntu-release: ["22.10", "23.04"]
+        ubuntu-release: ["23.04"]
 
     steps:
       - uses: actions/checkout@v3
