@@ -1,7 +1,7 @@
 ARG UBUNTU_RELEASE=23.04
 ARG USER=app UID=101 GROUP=app GID=101
 
-FROM golang:1.18 AS chisel
+FROM golang:1.21 AS chisel
 RUN git clone --depth 1 -b main https://github.com/canonical/chisel /opt/chisel
 WORKDIR /opt/chisel
 RUN go generate internal/deb/version.go \
