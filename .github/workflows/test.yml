@@ -1,4 +1,4 @@
-name: "Chiselled Ubuntu .NET7 Tests"
+name: "Chiselled Ubuntu .NET8 Tests"
 
 on: push
 
@@ -6,7 +6,7 @@ env:
   runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
-  dotnet-version: "7.0"
+  dotnet-version: "8.0"
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ubuntu-release: ["23.04"]
+        ubuntu-release: ["24.04"]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "7.0.x"
+          dotnet-version: "8.0.x"
 
       # Setup QEMU and Docker buildx
       - name: Set up QEMU
@@ -68,7 +68,7 @@ jobs:
       - name: Build the .NET runtime deps container image
         run: |
           set -x
-          archs=`cat rockcraft.*.dotnet-deps-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          archs=`cat rockcraft.*.dotnet-deps-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
           buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
 
           docker buildx build \
@@ -97,7 +97,7 @@ jobs:
       - name: Build the .NET runtime container image
         run: |
           set -x
-          archs=`cat rockcraft.*.dotnet-runtime-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          archs=`cat rockcraft.*.dotnet-runtime-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
           buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
 
           docker buildx build \
@@ -126,7 +126,7 @@ jobs:
       - name: Build the ASP.NET Core runtime container image
         run: |
           set -x
-          archs=`cat rockcraft.*.dotnet-aspnet-7.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          archs=`cat rockcraft.*.dotnet-aspnet-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
           buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
 
           docker buildx build \

@@ -1,6 +1,6 @@
-# Chiselled .NET 7.0
+# Chiselled .NET 8.0
 
-Chiselled Ubuntu container images for .NET 7.0.
+Chiselled Ubuntu container images for .NET 8.0.
 
 Find more details about each image and their usage at:
 

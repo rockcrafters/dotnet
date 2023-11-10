@@ -6,7 +6,7 @@ echo "Running test for ASP.NET Core app "
 (cd src && dotnet publish --no-self-contained -r linux-x64)
 
 RunContainer() {
-    docker run -d -p 8000:8080 --name web_helloworld -v $PWD/src:/app:ro --user $1 $ASPNET_IMAGE /app/bin/Debug/net7.0/linux-x64/Hello.dll
+    docker run -d -p 8000:8080 --name web_helloworld -v $PWD/src:/app:ro --user $1 $ASPNET_IMAGE /app/bin/Release/net8.0/linux-x64/Hello.dll
 
     # Allow time for web app to start
     sleep 5

@@ -1,5 +1,5 @@
 name: dotnet-deps
-version: 7.0
+version: 8.0
 base: 23.04
 platforms:
   amd64:

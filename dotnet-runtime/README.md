@@ -1,11 +1,11 @@
 # .NET Runtime 
 
-This ROCK is a tiny [Chiseled](https://github.com/canonical/chisel) Ubuntu container image, containing the [.NET](https://dotnet.microsoft.com/en-us/) runtimes and libraries necessary 
+This image is a tiny [Chiseled](https://github.com/canonical/chisel) Ubuntu container image, containing the [.NET](https://dotnet.microsoft.com/en-us/) runtimes and libraries necessary 
 for running .NET applications in production.
 
 # Dependencies
 
-This image relies on the `dotnet-runtime-deps` ROCK, which is built and maintained separately.
+This image relies on the `dotnet-runtime-deps` image, which is built and maintained separately.
 
 # References
 

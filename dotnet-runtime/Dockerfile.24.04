@@ -1,15 +1,15 @@
 ARG UBUNTU_RELEASE=23.04
 ARG USER=app UID=101 GROUP=app GID=101
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:f6bb94197c998019c372adbf67b61ee864204b5b0e57ec8a2c4db70ebf396f17 AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:ee06c62f7f3a72220204f8756eca37ffaa5451bd48466f757322aa536093c243 AS builder
 ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
-### TODO: REMOVE "git" and this, once .net7 slices are merged upstream
-RUN git clone -b "ROCKS-358_dotnet7-lunar" https://github.com/cjdcordeiro/chisel-releases.git
+### TODO: REMOVE "git" and this, once .net8 slices are merged upstream
+RUN git clone -b "ubuntu-24.04-proposed" https://github.com/canonical/chisel-releases.git
 
 ADD "https://github.com/canonical/chisel/releases/download/v0.8.0/chisel_v0.8.0_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
 RUN tar -xvf chisel.tar.gz -C /usr/bin/
@@ -21,11 +21,7 @@ RUN mkdir /rootfs \
         base-files_base \
         base-files_release-info \
         ca-certificates_data \
-        dotnet-runtime-7.0_libs \
-    # need to rename binary, otherwise:
-    #  "A fatal error was encountered. Cannot execute dotnet when renamed to dotnet7."
-    && mv /rootfs/usr/lib/dotnet/dotnet7 /rootfs/usr/lib/dotnet/dotnet \
-    && ln -s /usr/lib/dotnet/dotnet /rootfs/usr/bin/
+        dotnet-runtime-8.0_libs
 RUN install -d -m 0755 -o "$UID" -g "$GID" "/rootfs/home/$USER" \
     && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
     && echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
