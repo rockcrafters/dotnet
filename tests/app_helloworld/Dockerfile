@@ -1,4 +1,4 @@
-FROM ubuntu.azurecr.io/ubuntu:22.04 AS builder
+FROM ubuntu.azurecr.io/ubuntu:23.10 AS builder
 
 # install the .NET 6 SDK from the Ubuntu archive
 # (no need to clean the apt cache as this is an unpublished stage)
