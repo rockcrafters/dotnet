@@ -1,8 +1,8 @@
-FROM ubuntu.azurecr.io/ubuntu:22.04 AS builder
+FROM ubuntu.azurecr.io/ubuntu:24.04 AS builder
 
 # install the .NET 6 SDK from the Ubuntu archive
 # (no need to clean the apt cache as this is an unpublished stage)
-RUN apt-get update && apt-get install -y dotnet6 ca-certificates
+RUN apt-get update && apt-get install -y dotnet8 ca-certificates
 
 # add your application code
 WORKDIR /source
