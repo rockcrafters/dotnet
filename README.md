@@ -53,3 +53,46 @@ Each channel branch will contain one or more Chiselled images.
 You'll find more information about each Chiselled .NET image, as well as their
 build recipes and tests, in each one of their corresponding channel branches.
 
+## Building the .NET application image
+
+These chiselled Ubuntu images are typically used as base images for building
+one's application container image. For example:
+
+```docker
+FROM ubuntu.azurecr.io/ubuntu:24.04 AS builder
+# install the .NET 8 SDK from the Ubuntu archive
+# (no need to clean the apt cache as this is an unpublished stage)
+RUN apt-get update && apt-get install -y dotnet8 ca-certificates
+# add your application code, e.g. for a "Hello" app
+WORKDIR /source
+COPY src/ .
+# publish your .NET app
+RUN dotnet publish -c Release -o /app
+
+# Final chiselled image with the .NET application
+FROM ubuntu.azurecr.io/dotnet-runtime:8.0-24.04_edge
+WORKDIR /app
+COPY --from=builder /app ./
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "/app/Hello.dll"]
+```
+
+Similarly to the above, one can also add more package slices to an existing
+chiselled Ubuntu image. Here's an example on how to add `libicu70` to an
+`ubuntu/dotnet-deps` image:
+
+```docker
+FROM ubuntu.azurecr.io/ubuntu:22.04 AS base
+ARG TARGETARCH 
+# Get the Chisel binary
+ADD https://github.com/canonical/chisel/releases/download/v0.8.0/chisel_v0.8.0_linux_${TARGETARCH}.tar.gz chisel.tar.gz
+RUN tar -xf chisel.tar.gz && \
+    apt update && \
+    apt install -y ca-certificates && \
+    mkdir /rootfs && \
+    ./chisel cut --root /rootfs libicu70_libs
+
+# Final chiselled image with the libicu70 libraries
+FROM ubuntu.azurecr.io/dotnet-deps:6.0-22.04_stable
+COPY --from=base /rootfs /
+```
