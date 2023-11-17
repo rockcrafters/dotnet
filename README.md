@@ -58,7 +58,7 @@ build recipes and tests, in each one of their corresponding channel branches.
 These chiselled Ubuntu images are typically used as base images for building
 one's application container image. For example:
 
-```docker
+```dockerfile
 FROM ubuntu.azurecr.io/ubuntu:24.04 AS builder
 # install the .NET 8 SDK from the Ubuntu archive
 # (no need to clean the apt cache as this is an unpublished stage)
@@ -81,7 +81,7 @@ Similarly to the above, one can also add more package slices to an existing
 chiselled Ubuntu image. Here's an example on how to add `libicu70` to an
 `ubuntu/dotnet-deps` image:
 
-```docker
+```dockerfile
 FROM ubuntu.azurecr.io/ubuntu:22.04 AS base
 ARG TARGETARCH 
 # Get the Chisel binary
