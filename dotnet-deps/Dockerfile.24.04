@@ -8,8 +8,6 @@ RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
-### TODO: REMOVE "git" and this, once .net8 slices are merged upstream
-RUN git clone -b "ubuntu-24.04-proposed" https://github.com/canonical/chisel-releases.git
 
 ADD "https://github.com/canonical/chisel/releases/download/v0.8.0/chisel_v0.8.0_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
 RUN tar -xvf chisel.tar.gz -C /usr/bin/
@@ -21,7 +19,7 @@ RUN mkdir -p /rootfs/etc \
     && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
     && echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
 
-RUN chisel-wrapper --generate-dpkg-status /status -- --release ./chisel-releases/ --root /rootfs \
+RUN chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
     base-files_base \
     base-files_release-info \
     ca-certificates_data \
