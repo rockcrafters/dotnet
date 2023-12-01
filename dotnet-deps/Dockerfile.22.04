@@ -1,7 +1,7 @@
 ARG UBUNTU_RELEASE=22.04
 ARG USER=app UID=101 GROUP=app GID=101
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:83fc61c57dee4e20e0dfac33e988fd54160b136875cd6f4e9ff53ac178ddbeb6 AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:bd0de7834d9a0eda66df3c93e4980faf58ed56e48b45d36abfbffdd747a04531 AS builder
 ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
