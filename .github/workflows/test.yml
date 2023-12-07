@@ -28,7 +28,7 @@ jobs:
           sudo apt-get -y install skopeo
           pip install shyaml
 
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.100-rc.2.23502.2"
 
