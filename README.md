@@ -7,7 +7,7 @@ Home for the Chiselled Ubuntu images for .NET, by Canonical.
 ### `ubuntu/dotnet-deps`
 
 For those looking to run self-contained .NET applications. This is a tiny image
-that only contains the minimal set of dependencies for running for .NET, **but**
+that only contains the minimal set of dependencies for running .NET, **but**
 **not .NET itself**.
 
 ### `ubuntu/dotnet-runtime`
