@@ -1,15 +1,16 @@
 ARG UBUNTU_RELEASE=24.04
 ARG USER=app UID=101 GROUP=app GID=101
+ARG CHISEL_VERSION=0.8.1
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:7e7ab8c0a7987ed503876c1e7bebb1ddc0969027f629a9f9ef0cdc5f33fe0e3b AS builder
-ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE
+ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git file \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-ADD "https://github.com/canonical/chisel/releases/download/v0.8.1/chisel_v0.8.1_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
+ADD "https://github.com/canonical/chisel/releases/download/v${CHISEL_VERSION}/chisel_v${CHISEL_VERSION}_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
 RUN tar -xvf chisel.tar.gz -C /usr/bin/
 ADD "https://raw.githubusercontent.com/canonical/rocks-toolbox/main/chisel-wrapper" /usr/bin/chisel-wrapper
 RUN chmod +x /usr/bin/chisel-wrapper
