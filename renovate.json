@@ -28,5 +28,18 @@
   ],
   "baseBranches": [
     "/^channels\\/.*/"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$",
+        "(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$"
+      ],
+      "matchStrings": ["ARG CHISEL_VERSION=(?<currentValue>.*?)\\s"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "canonical/chisel",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    }
   ]
 }
