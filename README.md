@@ -41,7 +41,6 @@ For automation and release purposes, different versions of .NET are maintained
 in different **channel** branches:
 
 - .NET 6.0: [`channels/6.0/edge`](https://github.com/ubuntu-rocks/dotnet/tree/channels/6.0/edge/dotnet-runtime)
-- .NET 7.0: [`channels/7.0/edge`](https://github.com/ubuntu-rocks/dotnet/tree/channels/7.0/edge/dotnet-runtime)
 - .NET 8.0: [`channels/8.0/edge`](https://github.com/ubuntu-rocks/dotnet/tree/channels/8.0/edge/dotnet-runtime)
 
 The [central CI/CD pipelines](https://github.com/ubuntu-rocks/.build) that take
