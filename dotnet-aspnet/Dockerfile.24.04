@@ -30,15 +30,16 @@ COPY --from=builder /rootfs /
 COPY --from=builder /status /var/lib/dpkg/status
 
 FROM scratch
+ARG USER UID GROUP GID
 ENV \
+    APP_UID=$UID \
     # Configure web servers to bind to port 8080 when present
     ASPNETCORE_URLS=http://+:8080 \
     # Enable detection of running in a container
     DOTNET_RUNNING_IN_CONTAINER=true \
     # Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
-ARG USER UID GROUP GID
-
+USER $APP_UID
 COPY --from=builder /rootfs /
 # Workaround for https://github.com/moby/moby/issues/38710
 COPY --from=builder --chown="$UID:$GID" "/rootfs/home/$USER" "/home/$USER"
