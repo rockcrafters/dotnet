@@ -1,4 +1,4 @@
-ARG UBUNTU_RELEASE=22.10
+ARG UBUNTU_RELEASE=24.04
 ARG USER=app UID=101 GROUP=app GID=101
 
 FROM golang:1.22 AS chisel
@@ -9,7 +9,7 @@ RUN go generate internal/deb/version.go \
 ADD "https://raw.githubusercontent.com/canonical/rocks-toolbox/main/chisel-wrapper" chisel-wrapper
 RUN chmod +x chisel-wrapper
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:f4fff793fd398eb81092fa370a7db63f0a518c832d6de50146ab048b8ea0e9ed AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:4eef301bd53e72f08185a0d2692653f7773c712158d0923ba1942f7125ddd003 AS builder
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates file \
