@@ -7,6 +7,7 @@ env:
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
   dotnet-version: "8.0"
+  skopeo-image: 'quay.io/skopeo/stable:v1.15.1'
 
 jobs:
   build:
@@ -24,8 +25,6 @@ jobs:
 
       - name: Prepare working environment for running and collecting test results
         run: |
-          sudo apt-get update
-          sudo apt-get -y install skopeo
           pip install shyaml
 
       - uses: actions/setup-dotnet@v4
@@ -77,7 +76,11 @@ jobs:
             -f dotnet-deps/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-deps
 
-          skopeo copy oci-archive:dotnet-deps.tar docker-daemon:${{ env.runtime-deps-image-name }}
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $PWD:/workspace -w /workspace \
+             ${{ env.skopeo-image }} \
+             copy oci-archive:dotnet-deps.tar \
+             docker-daemon:${{ env.runtime-deps-image-name }}
 
           docker buildx build \
             --platform=${buildx_platforms} \
@@ -87,7 +90,12 @@ jobs:
             dotnet-deps
 
           for arch in $archs; do
-            skopeo copy --override-arch "$arch" oci-archive:dotnet-deps-sbom.tar oci-archive:"dotnet-deps-sbom.$arch.tar"
+            docker run --rm -v $PWD:/workspace \
+              -w /workspace \
+              ${{ env.skopeo-image }} \
+              copy --override-arch "$arch" \
+              oci-archive:dotnet-deps-sbom.tar \
+              oci-archive:"dotnet-deps-sbom.$arch.tar"
             syft packages \
               -o spdx-json \
               --name "${{ env.runtime-deps-image-name }}" \
@@ -106,7 +114,11 @@ jobs:
             -f dotnet-runtime/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-runtime
 
-          skopeo copy oci-archive:dotnet-runtime.tar docker-daemon:${{ env.runtime-image-name }}
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $PWD:/workspace -w /workspace \
+             ${{ env.skopeo-image }} \
+             copy oci-archive:dotnet-runtime.tar \
+             docker-daemon:${{ env.runtime-image-name }}
 
           docker buildx build \
             --platform=${buildx_platforms} \
@@ -116,7 +128,12 @@ jobs:
             dotnet-runtime
 
           for arch in $archs; do
-            skopeo copy --override-arch "$arch" oci-archive:dotnet-runtime-sbom.tar oci-archive:"dotnet-runtime-sbom.$arch.tar"
+            docker run --rm -v $PWD:/workspace \
+              -w /workspace \
+              ${{ env.skopeo-image }} \
+              copy --override-arch "$arch" \
+              oci-archive:dotnet-runtime-sbom.tar \
+              oci-archive:"dotnet-runtime-sbom.$arch.tar"
             syft packages \
               -o spdx-json \
               --name "${{ env.runtime-image-name }}" \
@@ -135,7 +152,11 @@ jobs:
             -f dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }} \
             dotnet-aspnet
 
-          skopeo copy oci-archive:dotnet-aspnet.tar docker-daemon:${{ env.aspnet-image-name }}
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $PWD:/workspace -w /workspace \
+             ${{ env.skopeo-image }} \
+             copy oci-archive:dotnet-aspnet.tar \
+             docker-daemon:${{ env.aspnet-image-name }}
 
           docker buildx build \
             --platform=${buildx_platforms} \
@@ -145,7 +166,12 @@ jobs:
             dotnet-aspnet
 
           for arch in $archs; do
-            skopeo copy --override-arch "$arch" oci-archive:dotnet-aspnet-sbom.tar oci-archive:"dotnet-aspnet-sbom.$arch.tar"
+            docker run --rm -v $PWD:/workspace \
+              -w /workspace \
+              ${{ env.skopeo-image }} \
+              copy --override-arch "$arch" \
+              oci-archive:dotnet-aspnet-sbom.tar \
+              oci-archive:"dotnet-aspnet-sbom.$arch.tar"
             syft packages \
               -o spdx-json \
               --name "${{ env.aspnet-image-name }}" \
