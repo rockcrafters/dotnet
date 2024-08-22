@@ -40,7 +40,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Set up Syft
-        uses: anchore/sbom-action/download-syft@v0.17.1
+        uses: anchore/sbom-action/download-syft@v0.17.2
         with:
           syft-version: "v0.80.0"
 
