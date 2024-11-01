@@ -25,7 +25,7 @@ RUN chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_R
     base-files_release-info \
     ca-certificates_data \
     dotnet-runtime-6.0_libs \
-    base-files_chisel
+    base-files_chisel \
     && mkdir -p /rootfs/usr/bin \
     && ln -s /usr/lib/dotnet/dotnet /rootfs/usr/bin/
 
