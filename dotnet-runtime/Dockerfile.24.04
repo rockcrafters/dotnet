@@ -1,6 +1,6 @@
 ARG UBUNTU_RELEASE=24.04
 ARG USER=app UID=101 GROUP=app GID=101
-ARG CHISEL_VERSION=0.9.1
+ARG CHISEL_VERSION=1.0.0
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:83a9f5d38a7a0fc010833ca22457910f9cdd1c2134c8b857edab1e470628840d AS builder
 ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
@@ -19,6 +19,7 @@ RUN mkdir /rootfs \
     && chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
         base-files_base \
         base-files_release-info \
+        base-files_chisel \
         ca-certificates_data \
         dotnet-runtime-8.0_libs
 RUN install -d -m 0755 -o "$UID" -g "$GID" "/rootfs/home/$USER" \
