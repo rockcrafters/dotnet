@@ -1,6 +1,6 @@
 ARG UBUNTU_RELEASE=22.04
 ARG USER=app UID=101 GROUP=app GID=101
-ARG CHISEL_VERSION=0.10.0
+ARG CHISEL_VERSION=1.0.0
 
 FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:1582c29f34a48752e406f1a261fe9545fad895da3f6bb4be55bc82485557564e AS builder
 ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
@@ -25,6 +25,7 @@ RUN chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_R
     base-files_release-info \
     ca-certificates_data \
     dotnet-runtime-6.0_libs \
+    base-files_chisel \
     && mkdir -p /rootfs/usr/bin \
     && ln -s /usr/lib/dotnet/dotnet /rootfs/usr/bin/
 
