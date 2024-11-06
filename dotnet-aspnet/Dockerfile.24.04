@@ -19,6 +19,7 @@ RUN mkdir /rootfs \
     && chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
         base-files_base \
         base-files_release-info \
+        base-files_chisel \
         ca-certificates_data \
         aspnetcore-runtime-8.0_libs
 RUN install -d -m 0755 -o "$UID" -g "$GID" "/rootfs/home/$USER" \
