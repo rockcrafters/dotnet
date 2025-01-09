@@ -1,9 +1,11 @@
-name: dotnet-runtime
-version: 8.0
-base: 24.04
+name: dotnet-deps
+version: 9.0
+base: 24.10
 platforms:
   amd64:
   arm64:
+    build-on: [amd64]
+  ppc64le:
     build-on: [amd64]
   s390x:
     build-on: [amd64]

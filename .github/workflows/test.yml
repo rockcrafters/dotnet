@@ -1,4 +1,4 @@
-name: "Chiselled Ubuntu .NET8 Tests"
+name: "Chiselled Ubuntu .NET9 Tests"
 
 on: push
 
@@ -6,7 +6,7 @@ env:
   runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
-  dotnet-version: "8.0"
+  dotnet-version: "9.0"
   skopeo-image: 'quay.io/skopeo/stable:v1.15.1'
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ubuntu-release: ["24.04"]
+        ubuntu-release: ["24.10"]
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.100-rc.2.23502.2"
+          dotnet-version: "9.0.x"
 
       # Setup QEMU and Docker buildx
       - name: Set up QEMU
@@ -67,7 +67,7 @@ jobs:
       - name: Build the .NET runtime deps container image
         run: |
           set -x
-          archs=`cat rockcraft.*.dotnet-deps-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          archs=`cat rockcraft.*.dotnet-deps-9.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
           buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
 
           docker buildx build \
@@ -105,7 +105,7 @@ jobs:
       - name: Build the .NET runtime container image
         run: |
           set -x
-          archs=`cat rockcraft.*.dotnet-runtime-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          archs=`cat rockcraft.*.dotnet-runtime-9.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
           buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
 
           docker buildx build \
@@ -143,7 +143,7 @@ jobs:
       - name: Build the ASP.NET Core runtime container image
         run: |
           set -x
-          archs=`cat rockcraft.*.dotnet-aspnet-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          archs=`cat rockcraft.*.dotnet-aspnet-9.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
           buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
 
           docker buildx build \

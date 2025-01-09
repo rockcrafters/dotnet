@@ -1,8 +1,8 @@
-ARG UBUNTU_RELEASE=24.04
+ARG UBUNTU_RELEASE=24.10
 ARG USER=app UID=101 GROUP=app GID=101
 ARG CHISEL_VERSION=1.0.0
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:da20fb875cfefd317c49e7aaf3998d3e5ad42c5b20f34a0eec6dca2fe4fbb8f4 AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:fad5ba7223f8d87179dfa23211d31845d47e07a474ac31ad5258afb606523c0d AS builder
 ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
@@ -21,7 +21,9 @@ RUN mkdir /rootfs \
         base-files_release-info \
         base-files_chisel \
         ca-certificates_data \
-        dotnet-runtime-8.0_libs
+        dotnet-runtime-9.0_libs
+RUN mv /rootfs/usr/lib/dotnet/dotnet9 /rootfs/usr/lib/dotnet/dotnet \
+    && ln -s ../lib/dotnet/dotnet /rootfs/usr/bin/dotnet
 RUN install -d -m 0755 -o "$UID" -g "$GID" "/rootfs/home/$USER" \
     && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
     && echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd

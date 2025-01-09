@@ -1,6 +1,6 @@
 name: dotnet-aspnet
-version: 8.0
-base: 24.04
+version: 9.0
+base: 24.10
 platforms:
   amd64:
   arm64:
