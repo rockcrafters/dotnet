@@ -22,7 +22,7 @@ RUN mkdir /rootfs \
         base-files_chisel \
         ca-certificates_data \
         aspnetcore-runtime-9.0_libs
-RUN mv /rootfs/usr/lib/dotnet/dotnet9 rootfs/usr/lib/dotnet/dotnet \
+RUN mv /rootfs/usr/lib/dotnet/dotnet9 /rootfs/usr/lib/dotnet/dotnet \
     && ln -s ../lib/dotnet/dotnet /rootfs/usr/bin/dotnet
 RUN install -d -m 0755 -o "$UID" -g "$GID" "/rootfs/home/$USER" \
     && echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
