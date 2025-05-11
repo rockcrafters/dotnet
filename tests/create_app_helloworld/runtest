@@ -1,0 +1,11 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for creating a .NET Hello World app from official templates"
+
+RunContainer() {
+    docker run --rm --user $1 $SDK_IMAGE new console --output /home/$1/app 
+}
+
+RunContainer app
+RunContainer root

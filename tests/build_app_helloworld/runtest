@@ -1,0 +1,13 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for building .NET Hello World app"
+
+RunContainer() {
+    docker create --rm --name test-build-app-helloworld --user $1 $SDK_IMAGE run --project /home/$1/app/Hello.csproj
+    docker cp  $PWD/src test-build-app-helloworld:/home/$1/app
+    docker start --attach test-build-app-helloworld
+}
+
+RunContainer app
+RunContainer root

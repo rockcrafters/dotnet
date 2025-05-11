@@ -1,0 +1,50 @@
+ARG UBUNTU_RELEASE=24.04
+ARG USER=app UID=101 GROUP=app GID=101
+ARG CHISEL_VERSION=1.1.0
+
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:e3b7fe80bcb7bd1b8c2301b8cf88973aa04774afdcf34d645897117dcbc0bc4a AS builder
+ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
+SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates git file \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+ADD "https://github.com/canonical/chisel/releases/download/v${CHISEL_VERSION}/chisel_v${CHISEL_VERSION}_linux_${TARGETARCH}.tar.gz" chisel.tar.gz
+RUN tar -xvf chisel.tar.gz -C /usr/bin/
+ADD "https://raw.githubusercontent.com/canonical/rocks-toolbox/main/chisel-wrapper" /usr/bin/chisel-wrapper
+RUN chmod +x /usr/bin/chisel-wrapper
+
+RUN mkdir /rootfs \
+    && chisel-wrapper --generate-dpkg-status /status -- --release "ubuntu-$UBUNTU_RELEASE" --root /rootfs \
+        base-files_base \
+        base-files_release-info \
+        base-files_chisel \
+        ca-certificates_data \
+        dotnet-sdk-8.0_libs
+RUN install -d -m 0755 -o "$UID" -g "$GID" "/rootfs/home/$USER" \
+&& echo -e "root:x:0:\n$GROUP:x:$GID:" >/rootfs/etc/group \
+&& echo -e "root:x:0:0:root:/root:/noshell\n$USER:x:$UID:$GID::/home/$USER:/noshell" >/rootfs/etc/passwd
+
+FROM scratch AS sbom-prep
+COPY --from=builder /rootfs /
+COPY --from=builder /status /var/lib/dpkg/status
+
+FROM scratch AS image-prep
+ARG USER UID GROUP GID
+ENV \
+    APP_UID=$UID \
+    # Configure web servers to bind to port 8080 when present
+    ASPNETCORE_URLS=http://+:8080 \
+    # Enable detection of running in a container
+    DOTNET_RUNNING_IN_CONTAINER=true \
+    # Set the invariant mode since ICU package isn't included (see https://github.com/dotnet/announcements/issues/20)
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+USER $APP_UID
+COPY --from=builder /rootfs /
+# Workaround for https://github.com/moby/moby/issues/38710
+COPY --from=builder --chown="$UID:$GID" "/rootfs/home/$USER" "/home/$USER"
+
+ENV DOTNET_NOLOGO=true DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+ENTRYPOINT ["/usr/bin/dotnet"]
+CMD ["--info"]

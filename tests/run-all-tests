@@ -6,6 +6,7 @@ echo "Running tests..."
 export RUNTIME_DEPS_IMAGE=${1:-"ubuntu/dotnet-deps:test"}
 export RUNTIME_IMAGE=${2:-"ubuntu/dotnet-runtime:test"}
 export ASPNET_IMAGE=${3:-"ubuntu/dotnet-aspnet:test"}
+export SDK_IMAGE=${4:-"ubuntu/dotnet-sdk:test"}
 
 CURRENT_FOLDER="$(dirname $(readlink -f $0))"
 
