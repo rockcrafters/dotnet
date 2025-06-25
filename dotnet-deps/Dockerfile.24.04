@@ -2,7 +2,7 @@ ARG UBUNTU_RELEASE=24.04
 ARG USER=app UID=101 GROUP=app GID=101
 ARG CHISEL_VERSION=1.2.0
 
-FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:932333528e27f2be8ae92535c4c3c2c1030a4cf368abbec1cf61d9ee8aa7cf41 AS builder
+FROM ubuntu.azurecr.io/ubuntu:$UBUNTU_RELEASE@sha256:adde43aa8a773e100cb2318bfb51d584bd25b914f99afdc710060cf5f5266ccd AS builder
 ARG USER UID GROUP GID TARGETARCH UBUNTU_RELEASE CHISEL_VERSION
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN apt-get update \
