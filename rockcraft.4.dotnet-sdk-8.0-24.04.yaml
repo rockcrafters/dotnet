@@ -1,0 +1,9 @@
+name: dotnet-sdk
+version: 8.0
+base: 24.04
+platforms:
+  amd64:
+  arm64:
+    build-on: [amd64]
+  s390x:
+    build-on: [amd64]

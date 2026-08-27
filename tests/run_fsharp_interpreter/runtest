@@ -1,0 +1,11 @@
+#!/bin/bash
+set -ex
+
+echo "Running test for the F# interpreter"
+
+RunContainer() {
+    docker run --rm --user $1 -v $PWD/helloworld.fsx:/helloworld.fsx:ro $SDK_IMAGE fsi /helloworld.fsx 
+}
+
+RunContainer app
+RunContainer root

@@ -6,6 +6,7 @@ env:
   runtime-deps-image-name: ubuntu/dotnet-deps:test
   runtime-image-name: ubuntu/dotnet-runtime:test
   aspnet-image-name: ubuntu/dotnet-aspnet:test
+  sdk-image-name: ubuntu/dotnet-sdk:test
   dotnet-version: "8.0"
   skopeo-image: 'quay.io/skopeo/stable:v1.15.1'
 
@@ -61,6 +62,12 @@ jobs:
         uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: dotnet-aspnet/Dockerfile.${{ matrix.ubuntu-release }}
+          ignore: DL3008,DL3015,SC3028
+
+      - name: Lint the .NET SDK container image recipe
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: dotnet-sdk/Dockerfile.${{ matrix.ubuntu-release }}
           ignore: DL3008,DL3015,SC3028
 
       # Build images for multiple archs
@@ -177,6 +184,44 @@ jobs:
               --name "${{ env.aspnet-image-name }}" \
               oci-archive:"dotnet-aspnet-sbom.$arch.tar" > "dotnet-aspnet-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
           done
+      
+      - name: Build the .NET SDK container image
+        run: |
+          set -x
+          archs=`cat rockcraft.*.dotnet-sdk-8.0-${{ matrix.ubuntu-release }}.yaml | shyaml get-value platforms | shyaml keys`
+          buildx_platforms="linux/$(echo ${archs} | sed 's/ /,linux\//g')"
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-sdk.tar \
+            -f dotnet-sdk/Dockerfile.${{ matrix.ubuntu-release }} \
+            dotnet-sdk
+
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $PWD:/workspace -w /workspace \
+             ${{ env.skopeo-image }} \
+             copy oci-archive:dotnet-sdk.tar \
+             docker-daemon:${{ env.sdk-image-name }}
+
+          docker buildx build \
+            --platform=${buildx_platforms} \
+            --output type=oci,dest=dotnet-sdk-sbom.tar \
+            -f dotnet-sdk/Dockerfile.${{ matrix.ubuntu-release }} \
+            --target sbom-prep \
+            dotnet-sdk
+
+          for arch in $archs; do
+            docker run --rm -v $PWD:/workspace \
+              -w /workspace \
+              ${{ env.skopeo-image }} \
+              copy --override-arch "$arch" \
+              oci-archive:dotnet-sdk-sbom.tar \
+              oci-archive:"dotnet-sdk-sbom.$arch.tar"
+            syft packages \
+              -o spdx-json \
+              --name "${{ env.sdk-image-name }}" \
+              oci-archive:"dotnet-sdk-sbom.$arch.tar" > "dotnet-sdk-${{ env.dotnet-version }}-${{ matrix.ubuntu-release }}-oci-$arch-root.sbom.spdx"
+          done
 
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@v7
@@ -187,7 +232,7 @@ jobs:
       - name: Run Tests
         working-directory: ${{ github.workspace }}/tests
         run: |
-          ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }} ${{ env.aspnet-image-name }}
+          ./run-all-tests ${{ env.runtime-deps-image-name }} ${{ env.runtime-image-name }} ${{ env.aspnet-image-name }} ${{ env.sdk-image-name }}
 
       - id: set-outputs
         if: always()
