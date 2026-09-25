@@ -1,3 +1,9 @@
+> [!WARNING]
+> **This repository has moved.**
+>
+> Development of this project now happens in the
+> [canonical/dotnet-containers](https://github.com/canonical/dotnet-containers).
+
 # Chiselled .NET
 
 Home for the Chiselled Ubuntu images for .NET, by Canonical.
