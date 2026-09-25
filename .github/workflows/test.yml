@@ -27,7 +27,7 @@ jobs:
         run: |
           pip install shyaml
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "6.0.x"
 
